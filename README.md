@@ -59,13 +59,33 @@ These Banks act differently, and we will examine some of them more closely in th
 
 
 ### Access Patterns
-...
+
+By default, access patterns change after hardware sleep or reset. The following are just observations, they are provided here as information to aid understanding. This is still a work in progress (WIP).  
+
+```
+// valid offsets over bank $8 (t0)
+
+// xx, 01, 02, xx, xx, 05, 06, xx, xx, 09, 0a, xx, xx, 0d, 0e, xx, xx, 11, 12, xx, xx, 15, 16, xx, xx, ... n
+
+// xx, 01, xx, 03, xx, 05, xx, 07, xx, 09, xx, 0b, xx, 0d, xx, 0f, xx, 11, xx, 13, xx, 15, xx, 17... n      
+// xx, xx, 02, xx, xx, xx, 06, xx, xx, xx, 0a, xx, xx, xx, 0e, xx, xx, xx, 12, xx, xx, xx, 16... n
+// xx, xx, xx, 03, xx, xx, xx, 07, xx, xx, xx, 0b, xx, xx, xx, 0f, xx, xx, xx, 13, xx, xx, xx, 17... n
+
+// 00, 01, xx, xx, 04, 05, xx, xx, 08, 09,   ...0x1d, ... n
+// 00, 01, 02, xx, 04, 05, 06, xx, 08, 09, 0a, xx, 0c, 0d, 0e, xx, 10, 11, 12, xx, 14, 15, 16 ... n
+```
+
+As previously mentioned, by default these patterns seem to always correspond to specific values given by the hardware register `0xBC400018` after reboot or sleep. It can be noted that any value ending with `4` (e.g., `0x8404`) or `8` (e.g., `0x8518`) results in completely disabled access, meaning any attempt to write to the target offset will have no effect and `ldl` will always return `0`.
+
 
 #### Switching Between Access Patterns
 ...
 
-#### Forcing Access Enablement
+
+### Forcing Access Enablement
 ...
+
+
 
 ### Sending and Retrieving Data
 ...
