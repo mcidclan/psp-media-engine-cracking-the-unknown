@@ -18,7 +18,7 @@ Those instructions are encoded as follows in MIPS64:
 
 
 and are most likely used exclusively in the media engine core, with the `a3 ($7)` register as `rt` as follows:  
-```
+```asm
 sdl src, offset(a3)
 ldl dst, offset(a3)
 ```
@@ -40,6 +40,7 @@ li t0, 0
 li t1, 0xffffffff
 sdl t1, 0(t0)
 ldl t2, 0(t0)
+
 .set pop
 ```
 
@@ -99,9 +100,11 @@ It has been observed that the banks `$1, $2, and $3` allow switching between acc
 .set volatile
 .set mips64
 .set noat
+
 sdl t0, 0($1)
 // or
 ldl t0, 0($1)
+
 .set pop
 ```
 
@@ -120,8 +123,16 @@ It has been found that forcing access and thus forcing active patterns can be ac
 
 This can simply be done, for example, as follows:  
 ```asm
+.set push
+.set noreorder
+.set volatile
+.set mips64
+.set noat
+
 li t1, 1
 sdl t1, -1($1)
+
+.set pop
 ```
 
 This will ensure that a pattern is active, but at this point we cannot yet be sure of the initial pattern, so we need something to fix it. This can be achieved using `$0` to `$3` just before accessing the negative offset.
@@ -132,17 +143,26 @@ As you can understand, these processes are still unclear, so you are invited to 
 
 For the moment, and as an example, here is how you can reach a specific pattern:
 ```asm
-// ...
+.set push
+.set noreorder
+.set volatile
+.set mips64
+.set noat
+
+// reset
 li $t1, 0
-sdl $t1, 0($0) // reset
+sdl $t1, 0($0)
+
 // switch to 00, xx, xx, xx, 04, xx, xx, xx, 08, xx, ... n pattern
 sdl $t1, 0($1)
 sdl $t1, 0($2)
 sdl $t1, 0($3)
+
 // force enable
 li $t1, 1
 sdl $t1, -1($1)
-// ...
+
+.set pop
 ```
 
 Here are some other observed patterns (WIP):  
@@ -162,11 +182,17 @@ We can send and retrieve data over all activated offsets, or over the offset ran
 
 It is interesting to note that (at least by default) sending and retrieving data over negative offsets appears to actually target the same registers or memory area, and thus this can be verified as follows:
 ```asm
-// ...
+.set push
+.set noreorder
+.set volatile
+.set mips64
+.set noat
+
 li $t1, 0x123
 sdl $t1, -1($0)
 ldl $t0, -1($7)
-// ...
+
+.set pop
 ```
 
 ### How Was This Knowledge Discovered ?
