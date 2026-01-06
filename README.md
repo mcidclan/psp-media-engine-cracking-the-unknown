@@ -3,6 +3,11 @@
 This project is an attempt to shed light on the Virtual Mobile Engine (VME) present in Sony's PSP, as well as the H.264 decoder, both available on the Media Engine side, by digging into the surrounding components and elements such as the local DMACs and VLD unit, the known specialized instructions like those reusing the LDL and SDL opcodes, and what appears to be a bitstream sent to the VME.
 
 
+## Targeted Components / Areas of Interest
+
+The components of interest in this study are primarily the VME, which, according to information provided by Sony, appears to be a type of CGRA, as well as the H.264 decoder. Both are hosted within the Media Engine.  
+
+
 ## LDL/SDL: Move-To and Move-From Vendor Specific Instructions
 
 Those instructions are encoded as follows in MIPS64:
@@ -57,6 +62,12 @@ Currently, three families of Banks are identified:
 
 These Banks act differently, and we will examine some of them more closely in the next sections.  
 
+#### Banks Behaviors
+
+* Bank $0 seems to allow resetting the patterns to a starting point.
+* Banks $1, $2, and $3 allow switching between access patterns.
+* Banks `$4, $5, $6, and $7` are probably of the same kind, with `$7` (register `a3`) being used in the firmware code. According to the code, this bank likely target internal memory or registers, but attempts to directly read/write them manually have not produced observable results yet.  
+* Banks `$8` to `$31` appear to hold actual data that can be read and written, and this data **persists across reset and code reboot**, suggesting that these banks are likely tied to the CGRA (VME) rather than the H.264 decoder.
 
 ### Access Patterns
 
@@ -79,13 +90,28 @@ As previously mentioned, by default these patterns seem to always correspond to 
 
 
 #### Switching Between Access Patterns
-...
+
+It has been observed that the banks `$1, $2, and $3` allow switching between access patterns. This can be done by targeting one of their offsets using `sdl` or `ldl` as follows:
+
+```asm
+.set push
+.set noreorder
+.set volatile
+.set mips64
+.set noat
+sdl t0, 0($1)
+// or
+ldl t0, 0($1)
+.set pop
+````
+
+Make sure to use `.set noat`, as using `$1` could trigger compiler optimizations or adjustments that are not compatible with our intended hardware usage.
+
+Targeting between two banks for example, $1 and $2, $1 and $3, or $2 and $3, will switch between two access patterns, depending on the pattern the hardware initially landed on after sleep or reboot. The initial pattern is undefined and seems random, so behavior can vary. Switching between all three banks at once appears to completely disable access, meaning that reads and writes will have no effect.
 
 
 ### Forcing Access Enablement
 ...
-
-
 
 ### Sending and Retrieving Data
 ...
@@ -96,6 +122,7 @@ Since these instructions were undocumented and the target hardware was unknown a
 
 Note: given the persistence of the data after code reboot, those instructions may not be related to the H.264 decoder, or could be shared with the VME or across multiple hardware components.  
 
+
 ## VME Bitstream
 ...
 
@@ -105,6 +132,11 @@ Note: given the persistence of the data after code reboot, those instructions ma
 ### Bitstream-Driven Data Transformation in Transfer Buffers
 ...
 
+## Testing Context
+
+It is important to note that these early tests have so far been conducted on a PSP Slim running CFW 6.61 Pro-C.  
+
+Iterations were performed through PSPLINK in order to reduce time consumption and simplify the testing process. However, note that when using PSPLINK, some initial states could differ from a normal eboot launch, for example when testing the VME bitstream.  
 
 ## Disclamer
 This project is provided for educational and research purposes only. This project and code are provided as-is without warranty. Users assume full responsibility for any implementation or consequences. Use at your own discretion and risk
