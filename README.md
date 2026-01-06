@@ -25,21 +25,37 @@ If the usage of `sdl` + `ldl` always leads to zero using `a3` with our configura
 ### Unpredictability after sleep or reboot
 
 ```
+.set push
+.set noreorder
+.set volatile
+.set mips64
+.set noat
+
 li t0, 0
 li t1, 0xffffffff
 sdl t1, 0(t0)
 ldl t2, 0(t0)
+.set pop
 ```
 
 With the previous code, `t2` will result in either a `zero` value or `0x7fff`. Actually, some hardware configuration seems to be affected after hardware sleep or hardware reboot. Note that it is not affected by a code reboot.  
 
-The access pattern to the target hardware registers or memory appars to not always be the same and may be identified (possibly just a coincidence) by the value given by the `0xBC400018` hardware profiler register, which is the one for Coprocessor stalled cycles on the System Control side.  
+The access pattern to the target hardware registers or memory appears to not always be the same and may be identified (possibly just a coincidence) by the value given by the `0xBC400018` hardware profiler register, which is the one for Coprocessor stalled cycles on the System Control side.  
 
-Additionally, in this code, the value passed to `t0` appears to be irrelevant, only the offset matters. As shown, `ldl` returns the positive value of a signed 16-bit data item.
+Additionally, in this code, the value passed to `t0` appears to be irrelevant, only the offset matters. As shown, `ldl` returns the maximun of the positive value of a signed 16-bit data item.
 
+### Banks / Access Context
 
-### Banks
-...
+The first conclusion, as a starting point regardless of the usage of the `rt` register, is that it should not be used like a classical MIPS register with `ldl` and `sdl`. Rather, it behaves more like a set of Banks or an Access Context.  
+
+Currently, three families of Banks are identified:  
+
+- $0  
+- $1, $2, $3  
+- $4, $5, $6, $7  
+- $8 to $31  
+
+These Banks act differently, and we will examine some of them more closely in the next sections.  
 
 
 ### Access Patterns
