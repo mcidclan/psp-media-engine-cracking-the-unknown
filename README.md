@@ -5,7 +5,7 @@ This project is an attempt to shed light on the Virtual Mobile Engine (VME) pres
 
 ## Targeted Components / Areas of Interest
 
-The components of interest in this study are primarily the VME, which, according to information provided by Sony, appears to be a type of CGRA, as well as the H.264 decoder. Both are hosted within the Media Engine.  
+The components of interest in this experimental investigation are primarily the VME, which, according to information provided by Sony, appears to be a type of CGRA, as well as the H.264 decoder. Both are hosted within the Media Engine.  
 
 
 ## LDL/SDL: Move-To and Move-From Vendor Specific Instructions
@@ -200,6 +200,11 @@ ldl $t0, -1($7)
 Since these instructions were undocumented and the target hardware was unknown and still is, the investigation was carried out through iterative experimental testing cycles, each starting from a distinct hypothesis. Hypotheses that did not yield exploitable results were then eliminated.  
 
 Note: given the persistence of the data after code reboot, those instructions may not be related to the H.264 decoder, or could be shared with the VME or across multiple hardware components.  
+
+
+### Important Notes on Current Findings
+
+The results from this part of our experimental investigation currently allow usage that is completely outside of what Sony appears to be doing with the `ldl` and `sdl` instructions in the Media Engine firmware. We are therefore dealing with unknown use cases, which for now are only useful for those who wish to investigate further, or potentially for using the accessible registers/memory to store persistent variables, although limited to signed 16-bit values. The approach used takes hardware feedback into account to expand our understanding of what we're dealing with.  
 
 
 ## VME Bitstream
