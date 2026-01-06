@@ -29,7 +29,7 @@ If the usage of `sdl` + `ldl` always leads to zero using `a3` with our configura
 
 ### Unpredictability after sleep or reboot
 
-```
+```asm
 .set push
 .set noreorder
 .set volatile
@@ -66,7 +66,7 @@ These Banks act differently, and we will examine some of them more closely in th
 
 * Bank $0 seems to allow resetting the patterns to a starting point.
 * Banks $1, $2, and $3 allow switching between access patterns.
-* Banks `$4, $5, $6, and $7` are probably of the same kind, with `$7` (register `a3`) being used in the firmware code. According to the code, this bank likely target internal memory or registers, but attempts to directly read/write them manually have not produced observable results yet.  
+* Banks `$4, $5, $6, and $7` are probably of the same kind, with `$7` (register `a3`) being used in the firmware code. According to the firmware, these banks likely target internal memory or registers. However, attempting to use them directly in the same way as observed in the Media Engine firmware code has not produced any observable results so far.
 * Banks `$8` to `$31` appear to hold actual data that can be read and written, and this data **persists across reset and code reboot**, suggesting that these banks are likely tied to the CGRA (VME) rather than the H.264 decoder.
 
 ### Access Patterns
@@ -103,18 +103,71 @@ sdl t0, 0($1)
 // or
 ldl t0, 0($1)
 .set pop
-````
+```
 
 Make sure to use `.set noat`, as using `$1` could trigger compiler optimizations or adjustments that are not compatible with our intended hardware usage.
 
 Targeting between two banks for example, $1 and $2, $1 and $3, or $2 and $3, will switch between two access patterns, depending on the pattern the hardware initially landed on after sleep or reboot. The initial pattern is undefined and seems random, so behavior can vary. Switching between all three banks at once appears to completely disable access, meaning that reads and writes will have no effect.
 
+#### Debugging
 
-### Forcing Access Enablement
-...
+As it can be difficult to obtain the same pattern after a hardware sleep or reboot, an assembly file containing a helper function has been added to this repository. It is a tool written and used during this experimental investigation.
+
+
+### Forcing Access and Activating Patterns
+
+It has been found that forcing access and thus forcing active patterns can be achieved by targeting negative offsets of the `$0`, `$1`, `$2`, and `$3` banks.  
+
+This can simply be done, for example, as follows:  
+```asm
+li t1, 1
+sdl t1, -1($1)
+```
+
+This will ensure that a pattern is active, but at this point we cannot yet be sure of the initial pattern, so we need something to fix it. This can be achieved using `$0` to `$3` just before accessing the negative offset.
+
+#### Switching Access Patterns After Forced Activation
+
+As you can understand, these processes are still unclear, so you are invited to conduct your own tests, and if you wish, come here to add your observations.
+
+For the moment, and as an example, here is how you can reach a specific pattern:
+```asm
+// ...
+li $t1, 0
+sdl $t1, 0($0) // reset
+// switch to 00, xx, xx, xx, 04, xx, xx, xx, 08, xx, ... n pattern
+sdl $t1, 0($1)
+sdl $t1, 0($2)
+sdl $t1, 0($3)
+// force enable
+li $t1, 1
+sdl $t1, -1($1)
+// ...
+```
+
+Here are some other observed patterns (WIP):  
+
+```
+// 00, xx, xx, xx, 04, xx, xx, xx, 08, xx, ... n (through offset -1 on $0        after setting 0 on banks $0,$1,$2,$3)
+// 00, 01, xx, xx, 04, 05, xx, xx, 08, 09, ... n (through offset -1 on $0 and $1 after setting 0 on banks $0,$1,$2,$3)
+// 00, xx, 02, xx, 04, xx, 06, xx, 08, xx, ... n (through offset -1 on $0 and $2 after setting 0 on banks $0,$1,$2,$3)
+// 00, xx, xx, 03, 04, xx, xx, 07, 08, xx, ... n (through offset -1 on $0 and $3 after setting 0 on banks $0,$1,$2,$3)
+```
 
 ### Sending and Retrieving Data
-...
+
+We can send and retrieve data over all activated offsets, or over the offset range -1 to -32768 (-0x8000), with limitations discussed in the following section:
+
+#### Using negative offsets
+
+It is interesting to note that (at least by default) sending and retrieving data over negative offsets appears to actually target the same registers or memory area, and thus this can be verified as follows:
+```asm
+// ...
+li $t1, 0x123
+sdl $t1, -1($0)
+ldl $t0, -1($7)
+// ...
+```
 
 ### How Was This Knowledge Discovered ?
 
