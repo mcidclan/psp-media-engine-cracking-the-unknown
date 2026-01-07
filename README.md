@@ -160,7 +160,12 @@ sdl $t1, 0($3)
 
 // force enable
 li $t1, 1
-sdl $t1, -1($1)
+sdl $t1, -1($0)
+
+//
+li $t1, 3
+sdl $t1, 0x04($8)
+ldl $t0, 0x04($8) // t0 gives 3
 
 .set pop
 ```
@@ -188,6 +193,7 @@ It is interesting to note that (at least by default) sending and retrieving data
 .set mips64
 .set noat
 
+li $7, 0x100 // This is not necessary, just as proof.
 li $t1, 0x123
 sdl $t1, -1($0)
 ldl $t0, -1($7)
