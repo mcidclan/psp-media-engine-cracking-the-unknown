@@ -5,7 +5,7 @@ This project is an attempt to shed light on the Virtual Mobile Engine (VME) pres
 
 ## Targeted Components / Areas of Interest
 
-The components of interest in this experimental investigation are primarily the VME, which, according to information provided by Sony, appears to be a type of CGRA, as well as the H.264 decoder. Both are hosted within the Media Engine.  
+The components of interest in this experimental investigation are primarily the VME and the H.264 decoder, both of which are hosted within the Media Engine. According to information provided by Sony, the VME appears to be a type of CGRA.  
 
 
 ## LDL/SDL: Move-To and Move-From Vendor Specific Instructions
