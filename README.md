@@ -220,7 +220,7 @@ This part of our experimental investigation is an attempt to figure out how the 
 
 ### Sending via DMAC
 
-Reversing the part of the code related to bitstream transfer into the ME core, reveals 2 possible addresses as sources for the bitstream. Unfortunately, neither of them contains directly exploitable data. The first targets the address of the ME EDRAM at `0x4...`, which contains a succession of 24-bit values. The other is at `0x5fff...`, which is probably a bad decompilation and causes a complete reset of the Media Engine. The exact reason (bus error, unhandled exception, etc.) has not been investigated. That said, below is the minimal configuration required to load the bitstream.  
+Reversing the part of the code related to bitstream transfer into the ME core, reveals 2 possible addresses as sources for the bitstream. Unfortunately, neither of them contains directly exploitable data. The first targets the address of the ME EDRAM at `0x403cf4f8`, which contains a succession of 24-bit values. The other is at `0x5fff917c`, which is probably a bad decompilation and causes a complete reset of the Media Engine. The exact reason (bus error, unhandled exception, etc.) has not been investigated. That said, below is the minimal configuration required to load the bitstream.  
 
 #### Minimal configuration
 ```cpp
@@ -440,7 +440,31 @@ Which gives us something like:
 | 5     | DU10          | DU11          |
 
 ### Default Met Values
-WIP ...  
+
+The following is an attempt to provide an initial interpretation of the data found in the EDRAM dump, which I believe corresponds to a default Processing Element.  
+```cpp
+// Default PE (neutral / inactive configuration)
+
+// Word 0
+0x8000, 0x0000, // PE enable (global valid), reserved / unused
+
+// Word 1
+0x0001, 0x0007, // ALU control: NOP / bypass, input source: IDLE / invalid?
+
+// Word 2
+0x0001, 0x0007, // ALU control: NOP / bypass, input source: IDLE / invalid?
+
+// Word 3
+0x0001, 0x0007, // ALU control: NOP / bypass, input source: IDLE / invalid?
+
+// Word 4
+0x0002, 0x0000, // Output routing configuration?, unused / default
+
+// Word 5
+0x003b, 0x0000, // PE index / local offset / base identifier?
+```
+
+Keep in mind that this may be incorrect, yet it is necessary to lay a logical foundation to proceed.  
 
 ### Bitstream-Driven Data Transformation in Local Ring Buffers
 WIP ...  
