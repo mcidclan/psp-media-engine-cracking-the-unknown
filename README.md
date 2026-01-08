@@ -5,7 +5,7 @@ This project is an attempt to shed light on the Virtual Mobile Engine (VME) pres
 
 ## Targeted Components / Areas of Interest
 
-The components of interest in this experimental investigation are primarily the VME and the H.264 decoder, both of which are hosted within the Media Engine. According to information provided by Sony, the VME appears to be a type of CGRA.  
+The components of interest in this experimental investigation are primarily the VME and the H.264 decoder, both of which are hosted within the Media Engine. According to information we can find on internet, the VME appears to be a type of CGRA.  
 
 
 ## LDL/SDL: Move-To and Move-From Vendor Specific Instructions
@@ -220,6 +220,8 @@ This part of our experimental investigation is an attempt to figure out how the 
 
 ### Sending via DMAC
 
+Reversing the part of the code related to bitstream transfer into the ME core, reveals 2 possible addresses as sources for the bitstream. Unfortunately, neither of them contains directly exploitable data. The first targets the address of the ME EDRAM at `0x4...`, which contains a succession of 24-bit values. The other is at `0x5fff...`, which is probably a bad decompilation and causes a complete reset of the Media Engine. The exact reason (bus error, unhandled exception, etc.) has not been investigated. That said, below is the minimal configuration required to load the bitstream.  
+
 #### Minimal configuration
 ```cpp
   hw(0x440ff004) = 0x10; // Routing config ?
@@ -231,27 +233,219 @@ This part of our experimental investigation is an attempt to figure out how the 
 
 ### Revealing the unknown
 
-By luck, during a test, a wrong address passed to the DMAC with the previous configuration was producing data transformation/generation over the internal 24-bit buffers.  
+By luck, during a test, a wrong address passed to the DMAC with the previous configuration was producing data transformation/generation over the internal 24-bit ring buffers.  
 
-From there, the first attempt was to send different random data, observe the result, and try to isolate which data units were triggering exploitable results.  
-
-This ended up revealing recognizable memory patterns that followed an exploitable structure, which was actually findable in the EDRAM dump.  
+From there, the first attempt was to send different random data, observe the result, and try to isolate which data units were triggering exploitable results. This ended up revealing recognizable memory patterns that followed an exploitable structure, which was actually findable in the EDRAM dump.  
 
 Please see tools/bitstream/edram-dump for the dumping sample.  
 
-#### Default bitstream
+#### About the default bitstream
 
-It is important to note that the bitstream or data found in the EDRAM does not generate changes over the internal buffers as is, but sending it with our DMAC minimal configuration makes it pass through the following wait status:  
+It is important to note that the bitstream or data found in the EDRAM does not generate changes over the internal ring buffers as is, but sending it with our DMAC minimal configuration makes it pass through the following wait status:  
 ```cpp
 meCoreDMACPrimMuxWaitStatus(0x800); 
 ```
 which I think could be related to waiting for the VME to be in a dormant state.  
 
 #### The emerging bitstream structure
+
+Here's an early analysis of the bitstream for what I believe, based on the limited information available on the VME, to be a type of CGRA:  
+```cpp
+unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
+  // Global CGRA configuration?
+  0x00000000, // 0x00 - config related to first internal ring buffer?
+  0x00000000, // 0x04 - config related to second internal ring buffer?
+  0x00000000, // 0x08 - config related to third internal ring buffer?
+  0x00000000, // 0x0c - config related to fourth internal ring buffer?
+  
+  0x00000000, // 0x10 - additional config / mode / word quantity?
+
+  // Unknown
+  0x00000000, // 0x14
+  0x00000000, // 0x18
+  0x00000000, // 0x1c
+  0x00000000, // 0x20
+
+  //
+  0x00000000, // 0x24
+  0x00000000, // 0x28 - mode / frequency / block size?
+  
+  // Unknown
+  0x00000000, // 0x2c
+  0x00000000, // 0x30
+  0x00000000, // 0x34
+  0x00000000, // 0x38
+
+  // Unknown
+  0x00000000, // 0x3c
+  0x00000000, // 0x40
+  0x00000000, // 0x44
+  0x00000000, // 0x48
+  0x00000000, // 0x4c
+  0x00000000, // 0x50
+  
+  // Unknown
+  0x00000000, // 0x54
+  0x00000000, // 0x58
+  0x00000000, // 0x5c
+  0x00000000, // 0x60 - affects output data / frequency / word quantity?
+  0x00000000, // 0x64
+  0x00000000, // 0x68
+  
+  // Processing Element (PE) 0 ?
+  // Transformation related / ring buffer selector 
+  0x00000000, // 0x6c - enable
+  0x00000000, // 0x70 - type / selector?
+  0x00000000, // 0x74 - type / selector?
+  0x00000000, // 0x78 - type / selector / disable ring buffers?
+  0x00000000, // 0x7c - type / selector / disable/enable data components?
+  0x00000000, // 0x80 - type / selector?
+  
+  // Processing Element (PE) 1 ?
+  // Enable transfer / transformation at offset 0x400 of all local ring buffers
+  0x00000000, // 0x84
+  0x00000000, // 0x88
+  0x00000000, // 0x8c
+  0x00000000, // 0x90
+  0x00000000, // 0x94
+  0x00000000, // 0x98
+
+  // Processing Element (PE) 2 ?
+  // Dynamic transformation?
+  0x00000000, // 0x9c - enable
+  0x00000000, // 0xa0 - type / data smoothing/graining?
+  0x00000000, // 0xa4 
+  0x00000000, // 0xa8
+  0x00000000, // 0xac
+  0x00000000, // 0xb0
+
+  // Processing Element (PE) 3 ?
+  // Same type as 0x84? Required to enable dynamic transformation?
+  0x00000000, // 0xb4 - enable + target first offset word to be transformed?
+  0x00000000, // 0xb8 - type?
+  0x00000000, // 0xbc
+  0x00000000, // 0xc0
+  0x00000000, // 0xc4
+  0x00000000, // 0xc8 - word quantity per ring buffer / frequency / components?
+  
+  // Processing Element (PE) 4 ?
+  // Unknown - No feedback yet
+  0x00000000, // 0xcc
+  0x00000000, // 0xd0
+  0x00000000, // 0xd4
+  0x00000000, // 0xd8
+  0x00000000, // 0xdc
+  0x00000000, // 0xe0
+  
+  // Processing Element (PE) 5 ?
+  // Same type as 0x84?
+  0x00000000, // 0xe4
+  0x00000000, // 0xe8
+  0x00000000, // 0xec
+  0x00000000, // 0xf0
+  0x00000000, // 0xf4
+  0x00000000, // 0xf8
+  
+  // Processing Element (PE) 6 ?
+  // Unknown - No feedback yet
+  0x00000000, // 0xfc
+  0x00000000, // 0x100
+  0x00000000, // 0x104
+  0x00000000, // 0x108
+  0x00000000, // 0x10c
+  0x00000000, // 0x110
+  
+  // Processing Element (PE) 7 ?
+  // Same type as 0x84?
+  0x00000000, // 0x114
+  0x00000000, // 0x118
+  0x00000000, // 0x11c
+  0x00000000, // 0x120
+  0x00000000, // 0x124
+  0x00000000, // 0x128
+  
+  // Processing Element (PE) 8 ?
+  // Unknown - No feedback yet
+  0x00000000, // 0x12c
+  0x00000000, // 0x130
+  0x00000000, // 0x134
+  0x00000000, // 0x138
+  0x00000000, // 0x13c
+  0x00000000, // 0x140
+  
+  // Processing Element (PE) 9 ?
+  // Same type as 0x84?
+  0x00000000, // 0x144
+  0x00000000, // 0x148
+  0x00000000, // 0x14c
+  0x00000000, // 0x150
+  0x00000000, // 0x154
+  0x00000000, // 0x158
+  
+  // Processing Element (PE) 10 ?
+  // Unknown - No feedback yet
+  0x00000000, // 0x15c
+  0x00000000, // 0x160
+  0x00000000, // 0x164
+  0x00000000, // 0x168
+  0x00000000, // 0x16c
+  0x00000000, // 0x170
+  
+  // Processing Element (PE) 11 ?
+  // Same type as 0x84?
+  0x00000000, // 0x174
+  0x00000000, // 0x178
+  0x00000000, // 0x17c
+  0x00000000, // 0x180
+  0x00000000, // 0x184
+  0x00000000, // 0x188
+  
+  // Processing Element (PE) 12 ?
+  // Unknown - No feedback yet
+  0x00000000, // 0x18c
+  0x00000000, // 0x190
+  0x00000000, // 0x194
+  0x00000000, // 0x198
+  0x00000000, // 0x19c
+  0x00000000, // 0x1a0
+  
+  // end?
+  0x00000000,  // 0x1a4
+};
+```
+
+As you can see, this first attempt to figure out an exploitable structure is highly abstract and imprecise. The goal behind this experimental investigation is to clarify the structure and meaning of the instructions/data units in the bitstream, which is the objective of the following sections that evolve alongside the tests and progress.
+
+#### PE Configuration Block Structure
+
+Each Processing Element (PE) in what we assume to be a CGRA, seems to be configured by a block of 6 consecutive 32-bit words, representing 12 x 16-bit configuration units:  
+```cpp
+// PE Configuration Block? (6 x 32-bit words = 12 x 16-bit units)
+0x80000000, // Word 0: Enable flag (bit 31 must be set to activate the PE)
+0x00000001, // Word 1: Operation selector (bit 0 = enable basic transform?)
+0x00000000, // Word 2: Configuration parameter?
+0x00000000, // Word 3: Configuration parameter?
+0x00000000, // Word 4: Configuration parameter?
+0x00000000, // Word 5: Configuration parameter?
+```
+
+Which gives us something like:  
+| Word  | Data Unit MSB | Data Unit LSB |
+|-------|---------------|---------------|
+| 0     | DU0           | DU1           |
+| 1     | DU2           | DU3           |
+| 2     | DU4           | DU5           |
+| 3     | DU6           | DU7           |
+| 4     | DU8           | DU9           |
+| 5     | DU10          | DU11          |
+
+### Default Met Values
 WIP ...  
 
-### Bitstream-Driven Data Transformation in Transfer Buffers
+### Bitstream-Driven Data Transformation in Local Ring Buffers
+WIP ...  
 
+#### Bitstream Examples
 WIP ...  
 
 ## Testing Context
