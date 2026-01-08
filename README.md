@@ -212,15 +212,47 @@ Note: given the persistence of the data after code reboot, those instructions ma
 
 The results from this part of our experimental investigation currently allow usage that is completely outside of what Sony appears to be doing with the `ldl` and `sdl` instructions in the Media Engine firmware. We are therefore dealing with unknown use cases, which for now are only useful for those who wish to investigate further, or potentially for using the accessible registers/memory to store persistent variables, although limited to signed 16-bit values. The approach used takes hardware feedback into account to expand our understanding of what we're dealing with.  
 
+---
 
 ## VME Bitstream
-...
+
+This part of our experimental investigation is an attempt to figure out how the Virtual Mobile Engine could be programmed, and whether what appears to be a bitstream sent somewhere is the one related to the VME or something else.
 
 ### Sending via DMAC
-...
+
+#### Minimal configuration
+```cpp
+  hw(0x440ff004) = 0x10; // Routing config ?
+  hw(0x440ff010) = 0x40000000 | (u32Me)&bitstream; // Channel1 src (host memory or me edram)
+  hw(0x440ff008) = 0x1c; // Control
+  
+  meCoreDMACPrimMuxWaitStatus(0x200); // Wait for the transfer to finish
+```
+
+### Revealing the unknown
+
+By luck, during a test, a wrong address passed to the DMAC with the previous configuration was producing data transformation/generation over the internal 24-bit buffers.  
+
+From there, the first attempt was to send different random data, observe the result, and try to isolate which data units were triggering exploitable results.  
+
+This ended up revealing recognizable memory patterns that followed an exploitable structure, which was actually findable in the EDRAM dump.  
+
+Please see tools/bitstream/edram-dump for the dumping sample.  
+
+#### Default bitstream
+
+It is important to note that the bitstream or data found in the EDRAM does not generate changes over the internal buffers as is, but sending it with our DMAC minimal configuration makes it pass through the following wait status:  
+```cpp
+meCoreDMACPrimMuxWaitStatus(0x800); 
+```
+which I think could be related to waiting for the VME to be in a dormant state.  
+
+#### The emerging bitstream structure
+WIP ...  
 
 ### Bitstream-Driven Data Transformation in Transfer Buffers
-...
+
+WIP ...  
 
 ## Testing Context
 
