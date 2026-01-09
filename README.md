@@ -258,6 +258,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x08 - config related to third internal ring buffer?
   0x00000000, // 0x0c - config related to fourth internal ring buffer?
   
+  //
   0x00000000, // 0x10 - additional config / mode / word quantity?
 
   // Unknown
@@ -265,16 +266,14 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x18
   0x00000000, // 0x1c
   0x00000000, // 0x20
-
-  //
-  0x00000000, // 0x24
-  0x00000000, // 0x28 - mode / frequency / block size?
   
-  // Unknown
-  0x00000000, // 0x2c
-  0x00000000, // 0x30
-  0x00000000, // 0x34
-  0x00000000, // 0x38
+  // Related to data transformation?
+  0x00000000, // 0x24
+  0x00000000, // 0x28 - mode / frequency / block size? - affect data
+  0x00000000, // 0x2c - affect ring buffer 0 data
+  0x00000000, // 0x30 - affect ring buffer 1 data
+  0x00000000, // 0x34 - affect ring buffer 2 data
+  0x00000000, // 0x38 - affect ring buffer 3 data
 
   // Unknown
   0x00000000, // 0x3c
@@ -292,8 +291,8 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x64
   0x00000000, // 0x68
   
-  // Processing Element (PE) 0 ?
-  // Transformation related / ring buffer selector 
+  // Processing Element (PE) 0 / router ? - This seems not to be an executable block.
+  // Transformation related / ring buffer selector? 
   0x00000000, // 0x6c - enable
   0x00000000, // 0x70 - type / selector?
   0x00000000, // 0x74 - type / selector?
@@ -301,8 +300,8 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x7c - type / selector / disable/enable data components?
   0x00000000, // 0x80 - type / selector?
   
-  // Processing Element (PE) 1 ?
-  // Enable transfer / transformation at offset 0x400 of all local ring buffers
+  // Processing Element (PE) 01 ? - This appear to be an executable block.
+  // Enable transfer / transformation of all local ring buffers?
   0x00000000, // 0x84
   0x00000000, // 0x88
   0x00000000, // 0x8c
@@ -310,7 +309,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x94
   0x00000000, // 0x98
 
-  // Processing Element (PE) 2 ?
+  // Processing Element (PE) 02 ? - This appear to be an executable block.
   // Dynamic transformation?
   0x00000000, // 0x9c - enable
   0x00000000, // 0xa0 - type / data smoothing/graining?
@@ -319,7 +318,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0xac
   0x00000000, // 0xb0
 
-  // Processing Element (PE) 3 ?
+  // Processing Element (PE) 03 ? - This appear to be an executable block.
   // Same type as 0x84? Required to enable dynamic transformation?
   0x00000000, // 0xb4 - enable + target first offset word to be transformed?
   0x00000000, // 0xb8 - type?
@@ -328,7 +327,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0xc4
   0x00000000, // 0xc8 - word quantity per ring buffer / frequency / components?
   
-  // Processing Element (PE) 4 ?
+  // Processing Element (PE) 04 ? - This appear to be an executable block.
   // Unknown - No feedback yet
   0x00000000, // 0xcc
   0x00000000, // 0xd0
@@ -337,7 +336,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0xdc
   0x00000000, // 0xe0
   
-  // Processing Element (PE) 5 ?
+  // Processing Element (PE) 05 ? - This appear to be an executable block.
   // Same type as 0x84?
   0x00000000, // 0xe4
   0x00000000, // 0xe8
@@ -346,7 +345,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0xf4
   0x00000000, // 0xf8
   
-  // Processing Element (PE) 6 ?
+  // Processing Element (PE) 06 ? - This appear to be an executable block.
   // Unknown - No feedback yet
   0x00000000, // 0xfc
   0x00000000, // 0x100
@@ -355,7 +354,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x10c
   0x00000000, // 0x110
   
-  // Processing Element (PE) 7 ?
+  // Processing Element (PE) 07 ? - This appear to be an executable block.
   // Same type as 0x84?
   0x00000000, // 0x114
   0x00000000, // 0x118
@@ -364,7 +363,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x124
   0x00000000, // 0x128
   
-  // Processing Element (PE) 8 ?
+  // Processing Element (PE) 08 ? - This appear to be an executable block.
   // Unknown - No feedback yet
   0x00000000, // 0x12c
   0x00000000, // 0x130
@@ -373,7 +372,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x13c
   0x00000000, // 0x140
   
-  // Processing Element (PE) 9 ?
+  // Processing Element (PE) 09 ? - This appear to be an executable block.
   // Same type as 0x84?
   0x00000000, // 0x144
   0x00000000, // 0x148
@@ -382,7 +381,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x154
   0x00000000, // 0x158
   
-  // Processing Element (PE) 10 ?
+  // Processing Element (PE) 10 ? - This appear to be an executable block.
   // Unknown - No feedback yet
   0x00000000, // 0x15c
   0x00000000, // 0x160
@@ -391,7 +390,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x16c
   0x00000000, // 0x170
   
-  // Processing Element (PE) 11 ?
+  // Processing Element (PE) 11 ? - This appear to be an executable block.
   // Same type as 0x84?
   0x00000000, // 0x174
   0x00000000, // 0x178
@@ -400,7 +399,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   0x00000000, // 0x184
   0x00000000, // 0x188
   
-  // Processing Element (PE) 12 ?
+  // Processing Element (PE) 12 ? - This appear to be an executable block.
   // Unknown - No feedback yet
   0x00000000, // 0x18c
   0x00000000, // 0x190
