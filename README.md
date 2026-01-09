@@ -59,7 +59,9 @@ Currently, three families of Banks are identified:
 - $0  
 - $1, $2, $3  
 - $4, $5, $6, $7  
-- $8 to $31  
+- $8, $9  
+- $10, $11, $12, $13  
+- $14 - $31  
 
 These Banks act differently, and we will examine some of them more closely in the next sections.  
 
