@@ -1,6 +1,6 @@
 ## PSP Media Engine Cracking The Unknown
 
-This project is an attempt to shed light on the Virtual Mobile Engine (VME) present in Sony's PSP, as well as the H.264 decoder, both available on the Media Engine side, by digging into the surrounding components and elements such as the local DMACs and VLD unit, the known specialized instructions like those reusing the LDL and SDL opcodes, and what appears to be a bitstream sent to the VME.
+This project is an attempt to shed light on the Virtual Mobile Engine (VME) present in Sony's PSP, as well as the H.264 decoder, both available on the Media Engine side, by digging into the surrounding components and elements such as the local DMACs and VLD unit, the known specialized instructions like those reusing the LDL and SDL opcodes, and what appears to be a bitstream sent via DMAC to the VME or possibly another component.
 
 
 ## Targeted Components / Areas of Interest
@@ -54,14 +54,14 @@ Additionally, in this code, the value passed to `t0` appears to be irrelevant, o
 
 The first conclusion, as a starting point regardless of the usage of the `rt` register, is that it should not be used like a classical MIPS register with `ldl` and `sdl`. Rather, it behaves more like a set of Banks or an Access Context.  
 
-Currently, three families of Banks are identified:  
+Currently, six families of Banks are identified:  
 
 - $0  
 - $1, $2, $3  
 - $4, $5, $6, $7  
 - $8, $9  
 - $10, $11, $12, $13  
-- $14 - $31  
+- $14 to $31  
 
 These Banks act differently, and we will examine some of them more closely in the next sections.  
 
@@ -70,7 +70,9 @@ These Banks act differently, and we will examine some of them more closely in th
 * Bank $0 seems to allow resetting the patterns to a starting point.
 * Banks $1, $2, and $3 allow switching between access patterns.
 * Banks `$4, $5, $6, and $7` are probably of the same kind, with `$7` (register `a3`) being used in the firmware code. According to the firmware, these banks likely target internal memory or registers. However, attempting to use them directly in the same way as observed in the Media Engine firmware code has not produced any observable results so far.
-* Banks `$8` to `$31` appear to hold actual data that can be read and written, and this data **persists across reset and code reboot**, suggesting that these banks are likely tied to the CGRA (VME) rather than the H.264 decoder.
+* Banks `$8` and `$9` appear to hold actual data that can be read and written, and this data persists across reset and code reboot for certain active patterns, suggesting that these banks could be tied to the CGRA (VME), rather than the H.264 decoder.
+* Banks `$10, $11, $12, $13` unknown
+* Banks `$14` to `$31` appear to behave the same way as `$8` and `9`
 
 ### Access Patterns
 
@@ -207,7 +209,7 @@ ldl $t0, -1($7)
 
 Since these instructions were undocumented and the target hardware was unknown and still is, the investigation was carried out through iterative experimental testing cycles, each starting from a distinct hypothesis. Hypotheses that did not yield exploitable results were then eliminated.  
 
-Note: given the persistence of the data after code reboot, those instructions may not be related to the H.264 decoder, or could be shared with the VME or across multiple hardware components.  
+Note: given the persistence of the data after code reboot over some active patterns, those instructions may be related to the VME, but the H.264 decoder should not be excluded. They could be shared between the VME, the H.264 decoder, and other hardware components.
 
 
 ### Important Notes on Current Findings
