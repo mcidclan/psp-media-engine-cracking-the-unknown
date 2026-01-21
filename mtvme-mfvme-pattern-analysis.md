@@ -17,6 +17,7 @@
 
 // | 0x18000601  | **, 01, **, **, **, 05, **, **, **, 09, ** ... | persistent, routed to the same registers/data                                                                |
 // | 0x24008802  | **, 01, 02, **, **, 05, 06, **, **, 09, 0a ... | not persistent, routed to independent registers/data                                                         |
+// | 0x4a001100  | **, **, 02, 03, **, **, 06, 07, **, **, 0a ... | not persistent, routed to the same registers/data                                                         |
 
 // | 0x1504      | **, **, **, **, **, **, **, **, **, **, ** ... | disabled?                                                                                                    |
 // | 0x0418      | **, **, **, **, **, **, **, **, **, **, ** ... | disabled?                                                                                                    |

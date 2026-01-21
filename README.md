@@ -257,10 +257,10 @@ Here's an early analysis of the bitstream for what I believe, based on the limit
 ```cpp
 unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
   // Global CGRA configuration?
-  0x00000000, // 0x00 - config related to first internal ring buffer?
-  0x00000000, // 0x04 - config related to second internal ring buffer?
-  0x00000000, // 0x08 - config related to third internal ring buffer?
-  0x00000000, // 0x0c - config related to fourth internal ring buffer?
+  0x00000000, // 0x00 - config / routing related to first internal ring buffer?
+  0x00000000, // 0x04 - config / routing related to second internal ring buffer?
+  0x00000000, // 0x08 - config / routing related to third internal ring buffer?
+  0x00000000, // 0x0c - config / routing related to fourth internal ring buffer?
   
   //
   0x00000000, // 0x10 - additional config / mode / word quantity?
@@ -444,30 +444,31 @@ Which gives us something like:
 
 ### Default Met Values
 
-The following is an attempt to provide an initial interpretation of the data found in the EDRAM dump, which I believe corresponds to a default Processing Element.  
+The following is an attempt to provide an initial interpretation of the data found in the EDRAM dump, which I believe corresponds to a default generic Processing Element.  
 ```cpp
 // Default PE (neutral / inactive configuration)
-
-// Word 0
-0x8000, 0x0000, // PE enable (global valid), reserved / unused
-
-// Word 1
-0x0001, 0x0007, // ALU control: NOP / bypass, input source: IDLE / invalid?
-
-// Word 2
-0x0001, 0x0007, // ALU control: NOP / bypass, input source: IDLE / invalid?
-
-// Word 3
-0x0001, 0x0007, // ALU control: NOP / bypass, input source: IDLE / invalid?
-
-// Word 4
-0x0002, 0x0000, // Output routing configuration?, unused / default
-
-// Word 5
-0x003b, 0x0000, // PE index / local offset / base identifier?
+0x8000, 0x0000, // Word 0 - PE enable (global valid), reserved / unused
+0x0001, 0x0007, // Word 1 - ALU control: NOP / bypass, input source: IDLE / invalid?
+0x0001, 0x0007, // Word 2 - ALU control: NOP / bypass, input source: IDLE / invalid?
+0x0001, 0x0007, // Word 3 - ALU control: NOP / bypass, input source: IDLE / invalid?
+0x0002, 0x0000, // Word 4 - Output routing configuration?, unused / default
+0x003b, 0x0000, // Word 5 - PE index / local offset / base identifier?
 ```
 
 Keep in mind that this may be incorrect, yet it is necessary to lay a logical foundation to proceed.  
+
+### The 0x0b4 Offset
+
+The executable block at `0x0b4` can be used as a dst configuration:
+
+```cpp
+0x80090000, // 0xb4 // The last 2 bytes specify the dst offset (max 2048 words / 8192 bytes), first bit enables it.
+0x0001007f, // 0xb8 // Max dst size minus 1, maximum value is 127?
+0x00000000, // 0xbc // Step - 1 during the copy.
+0x00000000, // 0xc0 // Step / gap - 1 on dst?
+0x00000000, // 0xc4 // msb, possibly for some offset routing?
+0x10000000, // 0xc8 // In this configuration, bit 31 or 28 should be active.
+```
 
 ### Bitstream-Driven Data Transformation in Local Ring Buffers
 WIP ...  
