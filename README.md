@@ -482,6 +482,11 @@ It is important to note that these early tests have so far been conducted on a P
 
 Iterations were performed through PSPLINK in order to reduce time consumption and simplify the testing process. However, note that when using PSPLINK, some initial states could differ from a normal eboot launch, for example when testing the VME bitstream.  
 
+## Syscall Tables
+
+### Slim+ (t2img.img)
+[Media Engine t2img Syscall Table](media-engine-t2img.syscall-table.txt)
+
 ## Disclamer
 This project is provided for educational and research purposes only. This project and code are provided as-is without warranty. Users assume full responsibility for any implementation or consequences. Use at your own discretion and risk
 
