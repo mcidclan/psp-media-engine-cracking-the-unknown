@@ -38,7 +38,7 @@ which I think could be related to waiting for the VME to be in a dormant/finish 
 
 Based on the limited information available on the VME, it appears to be a type of CGRA.
 
-Below is an early analysis of the bitstream:
+Below is an early attempt at mapping the structure and meaning of the bitstream and its command units:
 
 ```cpp
 unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
