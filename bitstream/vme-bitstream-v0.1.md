@@ -1,4 +1,4 @@
-## VME Bitstream
+## VME Bitstream v0.1 - Rough Exploration
 
 This part of our experimental investigation is an attempt to figure out how the Virtual Mobile Engine could be programmed, and whether what appears to be a bitstream sent somewhere is the one related to the VME or something else.
 

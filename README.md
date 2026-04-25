@@ -9,13 +9,12 @@ The components of interest in this experimental investigation are primarily the 
 
 ## VME Bitstream
 
-- [VME: Bitstream v0.1](bitstream/vme-bitstream-v0.1.md)  
-**older versions**:  
-- [VME: Bitstream v0.1](bitstream/vme-bitstream-v0.1.md)  
+- [VME: Bitstream v0.2 - Preliminary Spec](bitstream/vme-bitstream-v0.2.md)  
+- [VME: Bitstream v0.1 - Rough Exploration](bitstream/vme-bitstream-v0.1.md)  
 
 ## VME MoveTo and MoveFrom
 
-- [VME: MoveTo, MoveFrom](mt-mf-vme.md)
+- [VME: MoveTo, MoveFrom v0.1](mt-mf-vme.md)
 
 ## Syscall Tables
 
@@ -31,7 +30,9 @@ Iterations were performed through PSPLINK in order to reduce time consumption an
 This project is provided for educational and research purposes only. This project and code are provided as-is without warranty. Users assume full responsibility for any implementation or consequences. Use at your own discretion and risk
 
 ## Related work
-[PSP Media Engine Reload](https://github.com/mcidclan/psp-media-engine-reload)  
+
+[PSP Media Engine Safe Task + MIST](https://github.com/mcidclan/psp-media-engine-safe-task)  
 [PSP Media Engine Custom Core](https://github.com/mcidclan/psp-media-engine-custom-core)  
+[PSP Media Engine Reload](https://github.com/mcidclan/psp-media-engine-reload)  
 
 *m-c/d*
