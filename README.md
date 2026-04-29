@@ -7,10 +7,9 @@ This project is an attempt to shed light on the Virtual Mobile Engine (VME) pres
 
 The components of interest in this experimental investigation are primarily the VME and the H.264 decoder, both of which are hosted within the Media Engine. According to information we can find on internet, the VME appears to be a type of CGRA.  
 
-## VME Bitstream
+## The VME Itself
 
-- [VME: Bitstream v0.2 - Preliminary Spec](bitstream/vme-bitstream-v0.2.md)  
-- [VME: Bitstream v0.1 - Rough Exploration](bitstream/vme-bitstream-v0.1.md)  
+- [The PSP Virtual Mobile Engine](the-virtual-mobile-engine.md)
 
 ## VME MoveTo and MoveFrom
 
