@@ -166,9 +166,11 @@ After this, you can re-execute the VME without the need to re-upload the entire 
 
 ## Required Libraries and Related Work
 
-**Libraries**:  
-[PSP Media Engine Custom Core](https://github.com/mcidclan/psp-media-engine-custom-core)
-[PSP Media Engine Safe Task](https://github.com/mcidclan/psp-media-engine-safe-task)
+**Media Engine Libraries**:  
+[PSP Media Engine Safe Task](https://github.com/mcidclan/psp-media-engine-safe-task)  
+[PSP Media Engine Custom Core](https://github.com/mcidclan/psp-media-engine-custom-core)  
+
+**Initial Media Engine Project**:  
 [PSP Media Engine Reload](https://github.com/mcidclan/psp-media-engine-reload)  
 
 **Preliminary documents related to the VME Bitstream**:  
@@ -177,6 +179,8 @@ After this, you can re-execute the VME without the need to re-upload the entire 
 
 ## What's Next?
 
-It is said that no one has been able to interpret its "firmware" yet. I guess we can now say that someone has, at least partially, but that is no reason to stop here. Significant work remains to be done and more concrete sample code will follow, along with improvements to the `me-core-mapper` library to simplify access to the VME, whether you are using `me-custom-core` or `me-safe-task`.
+It is said that no one has been able to interpret its "firmware" yet. I guess we can now say that someone has, at least partially, but that is no reason to stop here. Significant work remains to be done and more concrete sample code will follow, along with improvements to the `me-core-mapper` library to simplify access to the VME, whether you are using `me-custom-core` or `me-safe-task`.  
+
+Thank you for reading!
 
 *m-c/d*
