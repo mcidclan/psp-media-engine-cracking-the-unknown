@@ -8,9 +8,9 @@ By luck, during a test, a wrong address passed to the DMAC with the previous con
 
 From there, the first attempt was to send various random data, observe the results, and try to isolate which data units were triggering exploitable outputs.
 
-This ended up revealing recognizable memory patterns, providing a first basis to explore toward the discovery of a clearer structure, one that was also recognizable inside an EDRAM dump.  
+This ended up revealing recognizable memory patterns, providing a first basis to explore toward the discovery of a clearer structure, one that was also recognizable inside an eDRAM dump.  
 
-Note: It is important to know, that the bitstream or related data found in the EDRAM does not generate changes over the internal ring buffers as is.
+Note: It is important to know, that the bitstream or related data found in the eDRAM does not generate changes over the internal ring buffers as is.
 
 ## The Emerging Bitstream Structure
 

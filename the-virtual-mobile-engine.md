@@ -51,20 +51,20 @@ That said, I had no idea why Sony wrote the default bitstream that way, so I sta
 Please see [vme-bitstream-v0.3.md](bitstream/vme-bitstream-v0.3.md) for more information.
 
 
-### The 0x440f8000 VME Fine Grained Controller / Data Path Mapping
+### The 0x440f8000 VME Fine Grained Controller / DataPath Mapping
 
 I started trying to transfer data using this hardware during the `Media Engine Reload` project. I succeeded in making transfers using it, but many registers behaved oddly, I first thought it was some sort of multiplexer, given the many available sources and destinations, and I got a bit lost with it at the time.
 
-Actually, this is a direct mapping to the internal Data Path of the VME itself, where this register (`0x440f8000`) directly corresponds to the base offset of the bitstream previously uploaded/injected into the VME that become its DataPath. And this, is fire!
+Actually, this is a direct mapping to the internal DataPath of the VME itself, where this register (`0x440f8000`) directly corresponds to the base offset of the bitstream previously uploaded/injected into the VME that become its DataPath. And this, is fire!
 
 That said, we can now understand the purpose of the previous coarse bitstream, the DataPath it defines within the VME, can be updated dynamically through the set of registers exposed by this controller.
  
  
 ### DSP Capabilities
 
-And yes, the VME has DSP capabilities. It exposes 8 main 24-bit ring buffers, 4 primary and 4 additional, all sharing the same base address at `0x44000000`, and each usable as either a source or a destination.
+The VME has DSP capabilities. It exposes 8 main 24-bit ring buffers, 4 primary and 4 additional, all sharing the same base address at `0x44000000`, and each usable as either a source or a destination.
 
-Each buffer is mirrored contiguously in memory with a size of 8192 bytes, since each 24-bit value is stored in a 32-bit word. The mirroring allows the data path to read and write across buffer boundaries without explicit wrap-around handling. The format uses 1 sign bit with two's complement fixed-point encoding, leaving 23 bits for the actual data.
+Each buffer is mirrored contiguously in memory with a size of 8192 bytes, since each 24-bit value is stored in a 32-bit word. The mirroring allows the DataPath to read and write across buffer boundaries without explicit wrap-around handling. The format uses 1 sign bit with two's complement fixed-point encoding, leaving 23 bits for the actual data.
 
 Another set of mirrored buffers starts at `0x44020000`, which appears to be one of the routable sources from which the VME can pull data, and the one I used to conduct my tests.
 
@@ -127,7 +127,7 @@ Then we can send our custom bitstream using the following:
   vmeLibSendCustomBitstream((void*)bitstream);
 ```
 
-This will upload the Bitstream to the VME to become the DSP Reconfigurable Data Path.
+This will upload the Bitstream to the VME to become the DSP Reconfigurable DataPath.
 
 ### Transfer from eDRAM to the 0x44020000 ring buffers
 
@@ -143,7 +143,7 @@ Then via me-core-mapper
 
 ### Fined Grained Reconfiguration
 
-We can send either an empty or a pre-filled bitstream to the VME, then use the Fine Grained Controller to update a specific part of the Data Path. First, we need to enable the controller using `meCoreBusClockEnableVMECtrl`, or let `vmeLibInit`, as previously seen, handle the entire initialization for us.
+We can send either an empty or a pre-filled bitstream to the VME, then use the Fine Grained Controller to update a specific part of the DataPath. First, we need to enable the controller using `meCoreBusClockEnableVMECtrl`, or let `vmeLibInit`, as previously seen, handle the entire initialization for us.
 
 It will then be possible to modify any word constituting the DataPath, using the `me-core-lib` macro as demonstrated in the following:
 
