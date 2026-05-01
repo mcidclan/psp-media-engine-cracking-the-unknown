@@ -133,9 +133,9 @@ This will upload the Bitstream to the VME to become the DSP Reconfigurable DataP
 
 The VME can operate over the buffer ranges activated by the Primary DMAC (`0x44000000` and `0x44020000`). To process data, the simplest configuration found for experimentation is to write raw data directly to the 0x44020000 buffers, which will act as the primary data source. With the configuration explored so far, the `0x44000000` buffers act as the destination, however they can also be used as a source. It is not yet known whether host memory and local eDRAM are also accessible as sources or destination.  
 
-The following will send the content of a buffer to `0x44020000` with a size of 32768 bytes and wait for the transfer to complete:
+We can send data to `0x44000000` and `0x44020000` either by memory-mapped I/O or by using the local DMAC. The following will send the content of a buffer to `0x44020000` with a size of 32768 bytes and wait for the transfer to complete:
 
-Then via me-core-mapper
+Then via `me-core-mapper`
 ```cpp
   meCoreDMACPrimMemoryToRingBuffer((void*)buffer, 0x8000, 0x2000);
   meCoreDMACPrimWaitTransfertFinish();
@@ -143,7 +143,13 @@ Then via me-core-mapper
 
 ### Fined Grained Reconfiguration
 
-We can send either an empty or a pre-filled bitstream to the VME, then use the Fine Grained Controller to update a specific part of the DataPath. First, we need to enable the controller using `meCoreBusClockEnableVMECtrl`, or let `vmeLibInit`, as previously seen, handle the entire initialization for us.
+We can send either an empty, a pre-filled or a fully operational bitstream to the VME, then use the Fine Grained Controller to update a specific part of the DataPath. First, we need to enable the controller using `meCoreBusClockEnableVMECtrl`, or let `vmeLibInit`, as previously seen, handle the entire initialization for us.
+
+Before writing to the DataPath controller we need to make sure it has the right state, so we need to start our update process with:
+
+```cpp
+  vmeLibStart();
+```
 
 It will then be possible to modify any word constituting the DataPath, using the `me-core-lib` macro as demonstrated in the following:
 
@@ -158,11 +164,13 @@ Or directly by using the index of the word in the DataPath:
   vme_set(1, 0x00000000);
 ```
 
-After this, you can re-execute the VME without the need to re-upload the entire bitstream, simply by calling:
+After this, we can re-execute the VME without the need to re-upload the entire bitstream, simply by calling:
 
 ```cpp
-  vmeLibRefreshProcess();
+  vmeLibFinish();
 ```
+
+Please keep in mind that the information provided here is a work in progress and will evolve alongside ongoing experiments and related libraries.
 
 ## Required Libraries and Related Work
 
