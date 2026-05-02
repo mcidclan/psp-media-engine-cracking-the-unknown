@@ -94,7 +94,7 @@ Here are some examples of the available DSP operations, the list is non-exhausti
 | `0x000e4000` | Exclusive OR                         | `(x ^ b)`                                     |
 | `0x000f4000` | Non-zero test                        | `(x != 0)`                                    |
 |              |                                      |                                               |
-| `0x00204000` | Multiply-accumulate with shift (MAC) | `(x * k) >> b`                                |
+| `0x00204000` | Multiply-accumulate with shift (MAC) | `(x * b) >> k`                                |
 
 
 #### DSP Process Element Operations
