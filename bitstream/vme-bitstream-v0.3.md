@@ -91,8 +91,8 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
      
     0x00000000, // 0x06C - unknown
     0x00000000, // 0x070 - unknown
-    0x00000000, // 0x074 - unknown
-    0x00000000, // 0x078 - PE Mapper, (? << 16) | (target PE: PE_3, PE_2, PE_1, PE_0)
+    0x00000000, // 0x074 - SRC PE Mapper, (? << 16) | (target PE: PE_3, PE_2, PE_1, PE_0)
+    0x00000000, // 0x078 - DST PE Mapper, (? << 16) | (target PE: PE_3, PE_2, PE_1, PE_0)
     0x00000000, // 0x07C - unknown 
     0x00000000, // 0x080 - unknown
     
@@ -104,12 +104,12 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
     // Source processor I (configuration and process)
     0x00000000, // 0x084 - (Local Config < 16) | (Source Offset)
     0x00000000, // 0x088 - (Local Config < 16) | (Source Count - 1)
-    0x00000000, // 0x08C - (Local Config < 16) | (Shift Scale and Step related?)
-    0x00000000, // 0x090 - (Local Config < 16) | (Shift Scale and Step related?)
-    0x00000000, // 0x094 - unclear / additionnal transformation / reserve
-    0x00000000, // 0x098 - unclear
+    0x00000000, // 0x08C - (Local Config < 16) | (Shift Scale and Step related, depends on Local Config)
+    0x00000000, // 0x090 - (Local Config < 16) | (Shift Scale and Step related, depends on Local Config)
+    0x00000000, // 0x094 - additionnal transformations, offset shift, reserve
+    0x00000000, // 0x098 - unclear / additionnal transformations
     
-    // Source processor II (configuration and process)
+    // Source processor II (configuration and process) could be used as a storage result
     0x00000000, // 0x09C
     0x00000000, // 0x0A0
     0x00000000, // 0x0A4
@@ -120,10 +120,10 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
     // Destination processor (configuration and process)
     0x00000000, // 0x0B4 - (Local Config < 16) | (Destination Offset)
     0x00000000, // 0x0B8 - (Local Config < 16) | (Destination Count - 1)
-    0x00000000, // 0x0BC - (Local Config < 16) | (Step related)
-    0x00000000, // 0x0C0 - (Local Config < 16) | (unclear)
-    0x00000000, // 0x0C4 - unclear / additionnal transformation / reserve
-    0x00000000, // 0x0C8 - unclear
+    0x00000000, // 0x0BC - (Local Config < 16) | (Shift Scale and Step related, depends on Local Config)
+    0x00000000, // 0x0C0 - (Local Config < 16) | (Shift Scale and Step related, depends on Local Config)
+    0x00000000, // 0x0C4 - additionnal transformations, offset shift, reserve
+    0x00000000, // 0x0C8 - unclear / additionnal transformations
     
     /*
      * Processing Element for routed buffers 1 , (base address: 0x44002000)
@@ -155,7 +155,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
     
     
     /*
-     * Processing Element for routed buffers 2
+     * Processing Element for routed buffers 2, (base address: 0x44004000)
      */
      
     // Unclear - Probably independent Source processor I
@@ -184,7 +184,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
     
     
     /*
-     * Processing Element for routed buffers 3
+     * Processing Element for routed buffers 3, (base address: 0x44004000)
      */
     
     // Unclear - Probably independent Source processor I
@@ -195,7 +195,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
     0x00000000, // 0x16C
     0x00000000, // 0x170
     
-    // Source processor II (e.g base address could be set at 0x44004000)
+    // Source processor II (e.g base address could be set at 0x44006000)
     0x00000000, // 0x174
     0x00000000, // 0x178
     0x00000000, // 0x17C
@@ -203,7 +203,7 @@ unsigned int defaultBitstream[] __attribute__((aligned(64))) = {
     0x00000000, // 0x184
     0x00000000, // 0x188
     
-    // Destination processor (e.g base address could be set at 0x44004000)
+    // Destination processor (e.g base address could be set at 0x44006000)
     0x00000000, // 0x18C
     0x00000000, // 0x190
     0x00000000, // 0x194
