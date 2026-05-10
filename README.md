@@ -9,7 +9,8 @@ The components of interest in this experimental investigation are primarily the 
 
 ## The VME Itself
 
-- [The PSP Virtual Mobile Engine](the-virtual-mobile-engine.md)
+- Cracking the unknown around [The PSP Virtual Mobile Engine](the-virtual-mobile-engine.md)
+- Processing over [The VME Bitstream and DataPath](the-vme-bitstream-and-datapath.md)
 
 ## VME MoveTo and MoveFrom
 
