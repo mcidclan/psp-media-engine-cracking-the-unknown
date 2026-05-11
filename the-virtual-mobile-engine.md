@@ -118,7 +118,7 @@ It is possible to directly communicate with the VME using the Primary DMAC regis
 First of all, before being able to write to the VME and related buffers, we need to initialize the hardware. Using the `me-core-lib`, we can simply do:
 
 ```cpp
-  vmeLibInit();
+  vmeLibEnable();
 ```
 
 Then we can send our custom bitstream using the following:
@@ -154,14 +154,9 @@ Before writing to the DataPath controller we need to make sure it has the right 
 It will then be possible to modify any word constituting the DataPath, using the `me-core-lib` macro as demonstrated in the following:
 
 ```cpp
-  vme_set(VME_DESCRIPTOR_1, 0x00000000);
-  vme_set(VME_PE_0_I_SRC, VME_ENABLE | 0x0000);
-```
-
-Or directly by using the index of the word in the DataPath:
-
-```cpp
-  vme_set(1, 0x00000000);
+  vme_set(PE_0, TOP_DESCRIPTOR, op, k);
+  vme_set(PE_0, TOP_SRC, VME_PFX_ROUTE);
+  vme_set(PE_0, TOP_COUNT, VME_PFX_PARAM, count);
 ```
 
 After this, we can re-execute the VME without the need to re-upload the entire bitstream, simply by calling:
@@ -171,6 +166,10 @@ After this, we can re-execute the VME without the need to re-upload the entire b
 ```
 
 Please keep in mind that the information provided here is a work in progress and will evolve alongside ongoing experiments and related libraries.
+
+## VME, DSP Documentation
+
+See the [Vme Bitstream and DataPath](the-vme-bitstream-and-datapath.md) documentation
 
 ## Required Libraries and Related Work
 

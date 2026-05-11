@@ -62,25 +62,33 @@ The composition of a Process Element is as follows, described here for PE 0:
 | `0x000e4000` | Exclusive OR                         | `(x ^ b)`                                     |
 | `0x000f4000` | Non-zero test                        | `(x != 0)`                                    |
 |              |                                      |                                               |
+
+### MACs
+
+| Opcode       | Operation                            | Expression                                    |
+|:-------------|:-------------------------------------|:----------------------------------------------|
 | `0x00204000` | Multiply-accumulate with shift (MAC) | `(x * b) >> k`                                |
 
 
 ### Inter-buffer
 
-| Opcode     | Operation                                                        | Expression                      |
-|:-----------|:-----------------------------------------------------------------|:--------------------------------|
-| 0x00010000 | Add root buffer to selected buffer and right shift               | `(root[x] + selected[x]) >> k`  |
-| 0x00020000 | Same as the previous one?                                        |                                 |
-| 0x00030000 | Add root buffer to selected buffer and add constant              | `(root[x] + selected[x]) + a`   |
-| 0x00040000 | Add root buffer to selected buffer right shifted by b            | `root[x] + (selected[x] >> b)`  |
-| 0x00050000 | Subtract selected buffer right shifted by b from root buffer     | `root[x] - (selected[x] >> b)`  |
-| 0x00060000 | Unknown                                                          |                                 |
-| 0x00070000 | Unknown                                                          |                                 |
-| 0x00080000 | Unknown                                                          |                                 |
-| 0x00090000 | Unknown                                                          |                                 |
-| 0x000a0000 | Unknown                                                          |                                 |
-| 0x000b0000 | Unknown                                                          |                                 |
-| 0x000c0000 | Unknown                                                          |                                 |
-| 0x000d0000 | Unknown                                                          |                                 |
-| 0x000e0000 | Unknown                                                          |                                 |
-| 0x000f0000 | Unknown                                                          |                                 |
+| Opcode       | Operation                                                         | Expression                              |
+|:-------------|:------------------------------------------------------------------|:----------------------------------------|
+| `0x00010000` | Add back buffer to front buffer and right shift                   | `(back[n] + front[n]) >> k`             |
+| `0x00020000` | Same as the previous one?                                         |                                         |
+| `0x00030000` | Add back buffer to front buffer and add constant                  | `(back[n] + front[n]) + a`              |
+| `0x00040000` | Add back buffer to front buffer right shifted by b                | `back[n] + (front[n] >> b)`             |
+| `0x00050000` | Subtract front buffer right shifted by b from back buffer         | `back[n] - (front[n] >> b)`             |
+| `0x00060000` | Conditional negation of back buffer based on front buffer mask    | `(front[n] & a) ? -back[n] : back[n]`   |
+| `0x00070000` | Shift back buffer left by k and add constant                      | `(back[n] << k) + b`                    |
+| `0x00080000` | Clamped multiply of back buffer by front buffer                   | `clamp(back[n], NEG2, POS2) * front[n]` |
+| `0x00090000` | *Unknown*                                                         |                                         |
+| `0x000a0000` | Shift back buffer left by front buffer value                      | `back[n] << front[n]`                   |
+| `0x000b0000` | Same as the previous one?                                         |                                         |
+| `0x000c0000` | Minimum of back and front buffer                                  | `min(back[n], front[n])`                |
+| `0x000d0000` | Bitwise OR of back and front buffer                               | `back[n] \| front[n]`                   |
+| `0x000e0000` | Bitwise XOR of back and front buffer                              | `back[n] ^ front[n]`                    |
+| `0x000f0000` | *Unknown*                                                         |                                         |
+
+
+*mcidclan, m-c/d 2026*
