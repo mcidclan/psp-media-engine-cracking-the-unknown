@@ -6,7 +6,15 @@ The following is an attempt to explain how the VME pipeline works.
 
 ### Pipeline
 
-The VME pipeline is composed of 4 main Process Elements (PEs). However, nodes associated with the same PE are not necessarily contiguous or sequential, neither in the configuration bitstream nor across the datapath controller interface. The main flow starts from the top and goes down to the last PE, although this can be reconfigured.
+- The VME pipeline is composed of 4 main Process Elements (PEs).
+- Nodes associated with the same PE are not necessarily contiguous or sequential, neither in the configuration bitstream nor across the datapath controller interface.
+- The main flow has a configurable entry point, by default starting from the top PE and going down to the last one. This entry point can be set to any PE, allowing partial use of the pipeline.
+- Each PE can at least process over 1 or 2 data sources depending on its configuration.
+- As an individual unit, the PE directly maps routes to data sources. For example, 'top' buffers are mapped to the related 'TOP' blocks of the PEs, and 'base' buffers are mapped to the 'BASE' blocks of the PEs.
+- By default, PEs run asynchronously and independently from each other. A sequential flow must be explicitly enforced through synchronization.
+- As a unit within a sequential flow, a PE inherits the last processed data from the previous stage, referred to as the back buffer, while still retaining its own TOP and BASE buffer mapping.
+- A PE can explicitly process data by applying ALU operations on its input, including arithmetic, bitwise logic, shifts and conditional operations. This behavior must be configured through the DESCRIPTOR node.
+- Independently of any computation, a PE always has a structural role through its source and destination configuration, covering routing, offsets, word counts, local transformations and synchronization, among other capabilities that are not yet fully understood.
 
 ### Process Element
 
