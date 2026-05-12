@@ -105,4 +105,19 @@ The composition of a Process Element is as follows, described here for PE 0:
 | `0x000f0000` | *Unknown*                                                         |                                         |
 
 
+
+### WIP
+
+### Runners
+
+| `0x00100000` | Running max | out[n] = max(out[n-1], in[n])
+
+| `0x00110000` |
+| `0x10120000` | Running rate-limited smoothing filter? | 
+
+#### Multiply
+| `0x00200000` | Multiply back and front buffers | `(back[n] * front[n]) >> k`                                |
+
+
+
 *mcidclan, m-c/d 2026*
