@@ -1,6 +1,6 @@
-## The VME Bitstream and DataPath Documentation
+## The VME Bitstream/Context and DataPath Documentation
 
-The VME has fine-grained capabilities, meaning we can first send it a coarse-grained bitstream for initial or full configuration of its datapath, and then apply targeted changes to specific exposed datapath nodes.
+The VME has fine-grained capabilities, meaning we can first send it a coarse-grained bitstream/context for initial or full configuration of its datapath, and then apply targeted changes to specific exposed datapath nodes.
 
 It appears to be far more advanced than a simple audio processor. Indeed, the discovered opcodes reveal a stream-oriented vector processing architecture, capable of operating directly on internal buffers through inter-buffer operations, fixed-point MAC and branchless conditional transforms. The whole thing suggests a hardware pipeline optimized for real-time vector computation rather than classic scalar execution.
 
@@ -13,7 +13,7 @@ The following is an attempt to explain how the VME pipeline works.
 ### Pipeline
 
 - The VME pipeline is composed of 4 main Process Elements (PEs).
-- Nodes associated with the same PE are not necessarily contiguous or sequential, neither in the configuration bitstream nor across the datapath controller interface.
+- Nodes associated with the same PE are not necessarily contiguous or sequential, neither in the configuration bitstream/context nor across the datapath controller interface.
 - The main flow has a configurable entry point, by default starting from the top PE and going down to the last one. This entry point can be set to any PE, allowing partial use of the pipeline.
 - Each PE can at least process over 1 or 2 data sources depending on its configuration.
 - As an individual unit, the PE directly maps routes to data sources. For example, 'top' buffers are mapped to the related 'TOP' blocks of the PEs, and 'base' buffers are mapped to the 'BASE' blocks of the PEs.
@@ -77,12 +77,14 @@ The composition of a Process Element is as follows, described here for PE 0:
 | `0x000f4000` | Non-zero test                        | `(x != 0)`                                    |
 |              |                                      |                                               |
 
-### MACs
+### Multiply / MACs
 
-| Opcode       | Operation                            | Expression                                    |
-|:-------------|:-------------------------------------|:----------------------------------------------|
-| `0x00204000` | Multiply-accumulate with shift (MAC) | `(x * b) >> k`                                |
-
+| Opcode       | Operation                                  | Expression                                    |
+|:-------------|:-------------------------------------------|:----------------------------------------------|
+| `0x00200000` | Multiply back and front buffers with shift | `(back[n] * front[n]) >> k`                   |
+| `0x00204000` | Multiply by constant with shift            | `(back[n] * b) >> k`                          |
+| `0x00208000` | Multiply-negate with shift                 | `(-(back[n] * front[n])) >> k`                |
+| `0x0020c000` | Multiply-negate by constant with shift     | `(-(back[n] * b)) >> k`                       |
 
 ### Inter-buffer
 
@@ -110,13 +112,27 @@ The composition of a Process Element is as follows, described here for PE 0:
 
 ### Runners
 
-| `0x00100000` | Running max | out[n] = max(out[n-1], in[n])
+| Opcode       | Operation                                                              | Expression                                       |
+|:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------|
+| `0x00100000` | Running max                                                            | out[n] = max(out[n-1], in[n])                    |
+| `0x00110000` | *unknown*                                                              |                                                  |
+| `0x00120000` | Running rate-limited smoothing filter / Peak Clamper ?                 | out[i]=min(in[i], max(in[0..i−1])); out[0]=in[0] |
+| `0x00130000` | running extrema filters | out[n]=max(LASTMIN(out), back[n]-front[n])   |                                                  |
+| `0x00140000` |                                                                        |                                                  |
+| `0x00150000` |                                                                        |                                                  |
+| `0x00160000` |                                                                        |                                                  |
+| `0x00170000` |                                                                        |                                                  |
+| `0x00180000` |                                                                        |                                                  |
+| `0x00190000` |                                                                        |                                                  |
+| `0x001a0000` |                                                                        |                                                  |
+| `0x001b0000` |                                                                        |                                                  |
+| `0x001c0000` |                                                                        |                                                  |
+| `0x001d0000` |                                                                        |                                                  |
+| `0x001e0000` |                                                                        |                                                  |
+| `0x001f0000` |                                                                        |                                                  |
 
-| `0x00110000` |
-| `0x10120000` | Running rate-limited smoothing filter? | 
 
-#### Multiply
-| `0x00200000` | Multiply back and front buffers | `(back[n] * front[n]) >> k`                                |
+
 
 
 

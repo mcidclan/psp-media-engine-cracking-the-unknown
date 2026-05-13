@@ -26,7 +26,7 @@ Feel free to check out these projects, as these libraries will be used to take a
 
 Based on available information at the time, this unit was described as a type of Coarse Grained Reconfigurable Architecture with a 24-bit data width, though this had never been fully confirmed, until now.
 
-And it is in fact both a type of CGRA and a Fine Grained Reconfigurable Architecture at the same time, as you can configure it once from a bitstream, or modify any part of the DataPath without reloading the entire bitstream.
+And it is in fact both a type of CGRA and a Fine Grained Reconfigurable Architecture at the same time, as you can configure it once from a bitstream/context, or modify any part of the DataPath without reloading the entire context.
 
 More precisely, we have a Coarse Grained Reconfigurable DSP with a Fine Grained controller extension over the PSP Media Engine.
 
@@ -36,7 +36,7 @@ Understanding this unit housed by the Media Engine, alongside the second MIPS co
 These steps did not follow a strict or regular research schedule. Many poorly understood topics were set aside and later revisited as ideas developed over time. That said, it should be seen as a whole, because in the end, everything contributed to getting here.
 
 
-### The Coarse Grained Bitstream
+### The Coarse Grained Bitstream/Context
 
 By luck, during a test, a wrong address passed to the DMAC at `0x440ff000` was producing data transformations over the internal 24-bit ring buffers.
 
@@ -44,9 +44,9 @@ From there, the first attempt was to send various random data, observe the resul
 
 This ended up revealing patterns, providing a first basis toward the discovery of a clearer structure, one that was also recognizable inside dumps of the local eDRAM.
 
-This default uploaded bitstream can be described as coarse, as it is not fully operational, it is simply loaded into the VME via a DMAC transfer, after which the VME waits for explicit data transfers or modifications.
+This default uploaded bitstream/context can be described as coarse, as it is not fully operational, it is simply loaded into the VME via a DMAC transfer, after which the VME waits for explicit data transfers or modifications.
 
-That said, I had no idea why Sony wrote the default bitstream that way, so I started experimenting further with VME processing over the bitstream, and got more concret results once I understood how to configure and program specific DSP processes with it.
+That said, I had no idea why Sony wrote the default context that way, so I started experimenting further with VME processing over the bitstream, and got more concret results once I understood how to configure and program specific DSP processes with it.
 
 Please see [vme-bitstream-v0.3.md](bitstream/vme-bitstream-v0.3.md) for more information.
 
@@ -55,9 +55,9 @@ Please see [vme-bitstream-v0.3.md](bitstream/vme-bitstream-v0.3.md) for more inf
 
 I started trying to transfer data using this hardware during the `Media Engine Reload` project. I succeeded in making transfers using it, but many registers behaved oddly, I first thought it was some sort of multiplexer, given the many available sources and destinations, and I got a bit lost with it at the time.
 
-Actually, this is a direct mapping to the internal DataPath of the VME itself, where this register (`0x440f8000`) directly corresponds to the base offset of the bitstream previously uploaded/injected into the VME that become its DataPath. And this, is fire!
+Actually, this is a direct mapping to the internal DataPath of the VME itself, where this register (`0x440f8000`) directly corresponds to the base offset of the context previously uploaded/injected into the VME that become its DataPath. And this, is fire!
 
-That said, we can now understand the purpose of the previous coarse bitstream, the DataPath it defines within the VME, can be updated dynamically through the set of registers exposed by this controller.
+That said, we can now understand the purpose of the previous coarse bitstream/context, the DataPath it defines within the VME, can be updated dynamically through the set of registers exposed by this controller.
  
  
 ### DSP Capabilities
@@ -113,7 +113,7 @@ The following is a list of identified operations or transfer controls that can b
 
 It is possible to directly communicate with the VME using the Primary DMAC registers and the dedicated Fine Grained Controller. However, the `me-core-mapper` and `me-core-lib` provide some useful helper functions that make the code easier, lighter, and more readable. It is therefore recommended to use them as much as possible.
 
-### Send The Bitstream
+### Send The Bitstream/Context
 
 First of all, before being able to write to the VME and related buffers, we need to initialize the hardware. Using the `me-core-lib`, we can simply do:
 
@@ -121,13 +121,13 @@ First of all, before being able to write to the VME and related buffers, we need
   vmeLibEnable();
 ```
 
-Then we can send our custom bitstream using the following:
+Then we can send our custom context using the following:
 
 ```cpp
-  vmeLibSendCustomBitstream((void*)bitstream);
+  vmeLibSendCustomContext((void*)context);
 ```
 
-This will upload the Bitstream to the VME to become the DSP Reconfigurable DataPath.
+This will upload the Bitstream/Context to the VME to become the DSP Reconfigurable DataPath.
 
 ### Transfer from eDRAM to the 0x44020000 ring buffers
 
@@ -143,7 +143,7 @@ Then via `me-core-mapper`
 
 ### Fined Grained Reconfiguration
 
-We can send either an empty, a pre-filled or a fully operational bitstream to the VME, then use the Fine Grained Controller to update a specific part of the DataPath. First, we need to enable the controller using `meCoreBusClockEnableVMECtrl`, or let `vmeLibInit`, as previously seen, handle the entire initialization for us.
+We can send either an empty, a pre-filled or a fully operational context to the VME, then use the Fine Grained Controller to update a specific part of the DataPath. First, we need to enable the controller using `meCoreBusClockEnableVMECtrl`, or let `vmeLibInit`, as previously seen, handle the entire initialization for us.
 
 Before writing to the DataPath controller we need to make sure it has the right state, so we need to start our update process with:
 
@@ -159,7 +159,7 @@ It will then be possible to modify any word constituting the DataPath, using the
   vme_set(PE_0, TOP_COUNT, VME_PFX_PARAM, count);
 ```
 
-After this, we can re-execute the VME without the need to re-upload the entire bitstream, simply by calling:
+After this, we can re-execute the VME without the need to re-upload the entire context, simply by calling:
 
 ```cpp
   vmeLibFinish();
@@ -169,7 +169,7 @@ Please keep in mind that the information provided here is a work in progress and
 
 ## VME, DSP Documentation
 
-See the [Vme Bitstream and DataPath](the-vme-bitstream-and-datapath.md) documentation
+See the [Vme Bitstream/Context and DataPath](the-vme-bitstream-and-datapath.md) documentation
 
 ## Required Libraries and Related Work
 
@@ -180,7 +180,7 @@ See the [Vme Bitstream and DataPath](the-vme-bitstream-and-datapath.md) document
 **Initial Media Engine Project**:  
 [PSP Media Engine Reload](https://github.com/mcidclan/psp-media-engine-reload)  
 
-**Preliminary documents related to the VME Bitstream**:  
+**Preliminary documents related to the VME Bitstream/Context**:  
 - [VME: Bitstream v0.2 - Preliminary Spec](bitstream/vme-bitstream-v0.2.md)  
 - [VME: Bitstream v0.1 - Rough Exploration](bitstream/vme-bitstream-v0.1.md)  
 
