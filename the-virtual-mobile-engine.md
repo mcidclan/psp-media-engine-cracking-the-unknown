@@ -48,7 +48,7 @@ This default uploaded bitstream/context can be described as coarse, as it is not
 
 That said, I had no idea why Sony wrote the default context that way, so I started experimenting further with VME processing over the bitstream, and got more concret results once I understood how to configure and program specific DSP processes with it.
 
-Please see [vme-bitstream-v0.3.md](bitstream/vme-bitstream-v0.3.md) for more information.
+Please see [vme-bitstream-v0.3.md](bitstream/vme-bitstream-v0.3.md) for more information related to the primary findings.
 
 
 ### The 0x440f8000 VME Fine Grained Controller / DataPath Mapping

@@ -27,7 +27,7 @@ The following is an attempt to explain how the VME pipeline works.
 The composition of a Process Element is as follows, described here for PE 0:
 
 | Register         | Description | Format |
-|---|---|---|
+|------------------|-------------|--------|
 | TOP_DESCRIPTOR   | Description of the DSP process to apply, starting with the index of the secondary source used to compute against the current buffer data, followed by the operation opcode and the k register value | `(index << 28 \| opcode << 8 \| k)` |
 | TOP_REGISTER_A   | The 'a' register used by the selected operation applied to the 'top' source| `a` |
 | TOP_REGISTER_B   | The 'b' register used by the selected operation applied to the 'top' source | `b` |
@@ -57,25 +57,25 @@ The composition of a Process Element is as follows, described here for PE 0:
 
 ### Generics
 
-| Opcode       | Operation                            | Expression                                    |
-|:-------------|:-------------------------------------|:----------------------------------------------|
-| `0x00004000` | Passthrough                          | `x`                                           |
-| `0x00014000` | Right shift                          | `(x >> k)`                                    |
-| `0x00024000` | Add immediate                        | `(x + b)`                                     |
-| `0x00034000` | Constant                             | `a`                                           |
-| `0x00044000` | Shift-accumulate                     | `(x >> b) + a`                                |
-| `0x00054000` | Shift and subtract                   | `(x >> b) - a`                                |
-| `0x00064000` | Conditional negation                 | `(x & a) != 0 ? x : NEG(x)` *(~x + 1)*        |
-| `0x00074000` | Subtract immediate                   | `(x - b)`                                     |
-| `0x00084000` | *Unknown*                            |                                               |
-| `0x00094000` | *Unknown*                            |                                               |
-| `0x000a4000` | Left shift                           | `(x << b)`                                    |
-| `0x000b4000` | Left shift (unclear)                 | `(x << b)`                                    |
-| `0x000c4000` | Bitwise AND                          | `(x & b)`                                     |
-| `0x000d4000` | Bitwise OR                           | `(x \| b)`                                    |
-| `0x000e4000` | Exclusive OR                         | `(x ^ b)`                                     |
-| `0x000f4000` | Non-zero test                        | `(x != 0)`                                    |
-|              |                                      |                                               |
+| Opcode       | Operation                                                              | Expression                                    |
+|:-------------|:-----------------------------------------------------------------------|:----------------------------------------------|
+| `0x00004000` | Passthrough                                                            | `x`                                           |
+| `0x00014000` | Right shift                                                            | `(x >> k)`                                    |
+| `0x00024000` | Add immediate with shift                                               | `(x + b) >> k`                                |
+| `0x00034000` | Sub back from front buffer and right shift                             | `(back[n] - front[n]) + a`                    |
+| `0x00044000` | Shift accumulate                                                       | `(x >> b) + a`                                |
+| `0x00054000` | Shift and subtract                                                     | `(x >> b) - a`                                |
+| `0x00064000` | Conditional negation                                                   | `(x & a) != 0 ? x : NEG(x)` *(~x + 1)*        |
+| `0x00074000` | Subtract immediate and left shift                                      | `(x - b) << k`                                |
+| `0x00084000` | Negative product of back[n] and front[n] if front[n] ∈ [-2, 2], else 0 | `-(back[n] * front[n]) * 1[−2,2]​(front[n])`   |
+| `0x00094000` | *Unknown*                                                              |                                               |
+| `0x000a4000` | Left shift                                                             | `(x << b)`                                    |
+| `0x000b4000` | Left shift (unclear)                                                   | `(x << b)`                                    |
+| `0x000c4000` | Bitwise AND                                                            | `(x & b)`                                     |
+| `0x000d4000` | Bitwise OR                                                             | `(x \| b)`                                    |
+| `0x000e4000` | Exclusive OR                                                           | `(x ^ b)`                                     |
+| `0x000f4000` | Non-zero test                                                          | `(x != 0)`                                    |
+|              |                                                                        |                                               |
 
 ### Multiply / MACs
 
@@ -85,6 +85,7 @@ The composition of a Process Element is as follows, described here for PE 0:
 | `0x00204000` | Multiply by constant with shift            | `(back[n] * b) >> k`                          |
 | `0x00208000` | Multiply-negate with shift                 | `(-(back[n] * front[n])) >> k`                |
 | `0x0020c000` | Multiply-negate by constant with shift     | `(-(back[n] * b)) >> k`                       |
+|              |                                            |                                               |
 
 ### Inter-buffer
 
@@ -105,10 +106,15 @@ The composition of a Process Element is as follows, described here for PE 0:
 | `0x000d0000` | Bitwise OR of back and front buffer                               | `back[n] \| front[n]`                   |
 | `0x000e0000` | Bitwise XOR of back and front buffer                              | `back[n] ^ front[n]`                    |
 | `0x000f0000` | *Unknown*                                                         |                                         |
-
-
+|              |                                                                   |                                         |
 
 ### WIP
+
+###
+| Opcode       | Operation                                                              | Expression                                       |
+|:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------|
+| `0x0000c000` | Constant                                                               | b                                                |
+|              |                                                                        |                                                  |
 
 ### Runners
 
@@ -130,10 +136,7 @@ The composition of a Process Element is as follows, described here for PE 0:
 | `0x001d0000` |                                                                        |                                                  |
 | `0x001e0000` |                                                                        |                                                  |
 | `0x001f0000` |                                                                        |                                                  |
-
-
-
-
+|              |                                                                        |                                                  |
 
 
 *mcidclan, m-c/d 2026*
