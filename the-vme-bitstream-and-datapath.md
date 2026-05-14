@@ -75,7 +75,6 @@ The composition of a Process Element is as follows, described here for PE 0:
 | `0x000d4000` | Bitwise OR                                                             | `(x \| b)`                                    |
 | `0x000e4000` | Exclusive OR                                                           | `(x ^ b)`                                     |
 | `0x000f4000` | Non-zero test                                                          | `(x != 0)`                                    |
-|              |                                                                        |                                               |
 
 ### Multiply / MACs
 
@@ -85,7 +84,6 @@ The composition of a Process Element is as follows, described here for PE 0:
 | `0x00204000` | Multiply by constant with shift            | `(back[n] * b) >> k`                          |
 | `0x00208000` | Multiply-negate with shift                 | `(-(back[n] * front[n])) >> k`                |
 | `0x0020c000` | Multiply-negate by constant with shift     | `(-(back[n] * b)) >> k`                       |
-|              |                                            |                                               |
 
 ### Inter-buffer
 
@@ -106,37 +104,39 @@ The composition of a Process Element is as follows, described here for PE 0:
 | `0x000d0000` | Bitwise OR of back and front buffer                               | `back[n] \| front[n]`                   |
 | `0x000e0000` | Bitwise XOR of back and front buffer                              | `back[n] ^ front[n]`                    |
 | `0x000f0000` | *Unknown*                                                         |                                         |
-|              |                                                                   |                                         |
 
-### WIP
-
-###
-| Opcode       | Operation                                                              | Expression                                       |
-|:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------|
-| `0x0000c000` | Constant                                                               | b                                                |
-|              |                                                                        |                                                  |
+## WIP
 
 ### Runners
 
+| Opcode       | Operation                                                              | Expression                                           |
+|:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
+| `0x00100000` | Running max                                                            | out[n] = max(out[n-1], in[n])                        |
+| `0x00110000` | running min extrema filters                                            | out[n] = min(LASTMIN(out), back[n] - front[n])       |
+| `0x00120000` | Running rate-limited smoothing filter / Peak Clamper ?                 | out[n] = min(in[n], max(in[0..n−1])); out[0] = in[0] |
+| `0x00130000` | running max extrema filters                                            | out[n] = max(LASTMIN(out), back[n] - front[n])       |
+
+### 0x00140000 to 0x001f0000
+
+| Opcode       | Operation                                                              | Expression                                           |
+|:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
+| `0x00140000` | *unknown*                                                              |                                                      |
+| `0x00150000` | *unknown*                                                              |                                                      |
+| `0x00160000` | *unknown*                                                              |                                                      |
+| `0x00170000` |                                                                        | (back[n] - a)                                        |
+| `0x00180000` | *unknown*                                                              |                                                      |
+| `0x00190000` | *unknown*                                                              |                                                      |
+| `0x001a0000` | *unknown*                                                              |                                                      |
+| `0x001b0000` | Constant                                                               | b                                                    |
+| `0x001c0000` | Add back buffer to front buffer                                        | (back[n] + front[n])                                 |
+| `0x001d0000` | *unknown*                                                              |                                                      |
+| `0x001e0000` |                                                                        | (back[n] - front[n]) + a                             |
+| `0x001f0000` |                                                                        | (front[n] - back[n]) + b                             |
+
+### 0x0000c000 to ?
 | Opcode       | Operation                                                              | Expression                                       |
 |:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------|
-| `0x00100000` | Running max                                                            | out[n] = max(out[n-1], in[n])                    |
-| `0x00110000` | *unknown*                                                              |                                                  |
-| `0x00120000` | Running rate-limited smoothing filter / Peak Clamper ?                 | out[i]=min(in[i], max(in[0..i−1])); out[0]=in[0] |
-| `0x00130000` | running extrema filters | out[n]=max(LASTMIN(out), back[n]-front[n])   |                                                  |
-| `0x00140000` |                                                                        |                                                  |
-| `0x00150000` |                                                                        |                                                  |
-| `0x00160000` |                                                                        |                                                  |
-| `0x00170000` |                                                                        |                                                  |
-| `0x00180000` |                                                                        |                                                  |
-| `0x00190000` |                                                                        |                                                  |
-| `0x001a0000` |                                                                        |                                                  |
-| `0x001b0000` |                                                                        |                                                  |
-| `0x001c0000` |                                                                        |                                                  |
-| `0x001d0000` |                                                                        |                                                  |
-| `0x001e0000` |                                                                        |                                                  |
-| `0x001f0000` |                                                                        |                                                  |
-|              |                                                                        |                                                  |
+| `0x0000c000` | Constant                                                               | b                                                |
 
 
 *mcidclan, m-c/d 2026*
