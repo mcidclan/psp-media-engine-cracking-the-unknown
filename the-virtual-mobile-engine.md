@@ -24,11 +24,11 @@ Feel free to check out these projects, as these libraries will be used to take a
 
 ## The VME itself
 
-Based on available information at the time, this unit was described as a type of Coarse Grained Reconfigurable Architecture with a 24-bit data width, though this had never been fully confirmed, until now.
+Based on the available information at the time, this unit was described as a type of Coarse-Grained Reconfigurable Architecture (CGRA) with a 24-bit data width, though this had never been fully confirmed until now.
 
-And it is in fact both a type of CGRA and a Fine Grained Reconfigurable Architecture at the same time, as you can configure it once from a bitstream/context, or modify any part of the DataPath without reloading the entire context.
+It is in fact a type of CGRA featuring fine-grained runtime reconfiguration capabilities, as it can be configured once from a bitstream/context while still allowing modifications to individual parts of the datapath without reloading the entire context.
 
-More precisely, we have a Coarse Grained Reconfigurable DSP with a Fine Grained controller extension over the PSP Media Engine.
+More precisely, we have a coarse-grained reconfigurable DSP with a fine-grained control extension over the PSP Media Engine.
 
 
 Understanding this unit housed by the Media Engine, alongside the second MIPS core and the H.264 decoder, came from both reverse engineering of the Media Engine core I carried out in Ghidra, and from numerous trial-and-error tests on a PSP Slim.
@@ -38,17 +38,15 @@ These steps did not follow a strict or regular research schedule. Many poorly un
 
 ### The Coarse Grained Bitstream/Context
 
-By luck, during a test, a wrong address passed to the DMAC at `0x440ff000` was producing data transformations over the internal 24-bit ring buffers.
+By luck, during a test, a wrong address passed to the DMAC at `0x440ff000` started producing data transformations over the internal 24-bit ring buffers.
 
-From there, the first attempt was to send various random data, observe the results, and try to isolate which data units were triggering exploitable outputs.
+From there, the first attempt was to send various random data patterns, observe the results, and try to isolate which data units were triggering exploitable outputs.
 
-This ended up revealing patterns, providing a first basis toward the discovery of a clearer structure, one that was also recognizable inside dumps of the local eDRAM.
+This eventually revealed recurring patterns, providing a first basis toward discovering a clearer structure, one that was also recognizable inside local eDRAM dumps.
 
-This default uploaded bitstream/context can be described as coarse, as it is not fully operational, it is simply loaded into the VME via a DMAC transfer, after which the VME waits for explicit data transfers or modifications.
+This default uploaded bitstream/context can be described as coarse, as it is not fully operational by itself. It is simply loaded into the VME through a DMAC transfer, after which the VME waits for explicit data transfers or runtime modifications.
 
-That said, I had no idea why Sony wrote the default context that way, so I started experimenting further with VME processing over the bitstream, and got more concret results once I understood how to configure and program specific DSP processes with it.
-
-Please see [vme-bitstream-v0.3.md](bitstream/vme-bitstream-v0.3.md) for more information related to the primary findings.
+That said, I initially had no idea why Sony wrote the default context that way, so I started experimenting further by feeding different bitstreams/contexts to the VME and observing its behavior, and obtained more concrete results once I understood how to configure and program specific DSP processes with it.
 
 
 ### The 0x440f8000 VME Fine Grained Controller / DataPath Mapping
@@ -73,7 +71,7 @@ The VME itself appears to operate using relative offsets starting from 0, depend
 
 #### DSP Operations / Instruction Set
 
-Here are some examples of the available DSP operations, the list is non-exhaustive:
+Here are some examples of the available DSP operations:
 
 | Opcode       | Operation                            | Expression                                    |
 |:-------------|:-------------------------------------|:----------------------------------------------|
@@ -96,6 +94,7 @@ Here are some examples of the available DSP operations, the list is non-exhausti
 |              |                                      |                                               |
 | `0x00204000` | Multiply-accumulate with shift (MAC) | `(x * b) >> k`                                |
 
+*Note: The list is preliminary and non-exhaustive, and may contain inaccuracies.*
 
 #### DSP Process Element Operations
 
@@ -169,18 +168,21 @@ Please keep in mind that the information provided here is a work in progress and
 
 ## VME, DSP Documentation
 
-See the [Vme Bitstream/Context and DataPath](the-vme-bitstream-and-datapath.md) documentation
+For more technical information, please see the [Vme Bitstream/Context and DataPath](the-vme-bitstream-and-datapath.md) documentation
 
 ## Required Libraries and Related Work
 
 **Media Engine Libraries**:  
-[PSP Media Engine Safe Task](https://github.com/mcidclan/psp-media-engine-safe-task)  
 [PSP Media Engine Custom Core](https://github.com/mcidclan/psp-media-engine-custom-core)  
+[PSP Media Engine Safe Task](https://github.com/mcidclan/psp-media-engine-safe-task)  
 
 **Initial Media Engine Project**:  
 [PSP Media Engine Reload](https://github.com/mcidclan/psp-media-engine-reload)  
 
+## Archived information
+
 **Preliminary documents related to the VME Bitstream/Context**:  
+- [VME: Bitstream v0.3 - Uncomplete Spec](bitstream/vme-bitstream-v0.3.md)  
 - [VME: Bitstream v0.2 - Preliminary Spec](bitstream/vme-bitstream-v0.2.md)  
 - [VME: Bitstream v0.1 - Rough Exploration](bitstream/vme-bitstream-v0.1.md)  
 

@@ -1,6 +1,6 @@
 ## The VME Bitstream/Context and DataPath Documentation
 
-The VME has fine-grained capabilities, meaning we can first send it a coarse-grained bitstream/context for initial or full configuration of its datapath, and then apply targeted changes to specific exposed datapath nodes.
+The VME features fine-grained control capabilities, meaning it can first be configured with a coarse-grained bitstream/context for initial or full datapath setup, and then apply targeted updates to specific exposed datapath nodes.
 
 It appears to be far more advanced than a simple audio processor. Indeed, the discovered opcodes reveal a stream-oriented vector processing architecture, capable of operating directly on internal buffers through inter-buffer operations, fixed-point MAC and branchless conditional transforms. The whole thing suggests a hardware pipeline optimized for real-time vector computation rather than classic scalar execution.
 
