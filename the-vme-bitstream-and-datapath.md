@@ -109,12 +109,33 @@ The composition of a Process Element is as follows, described here for PE 0:
 
 ### Runners
 
-| Opcode       | Operation                                                              | Expression                                           |
-|:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
-| `0x00100000` | Running max                                                            | out[n] = max(out[n-1], in[n])                        |
-| `0x00110000` | running min extrema filters                                            | out[n] = min(LASTMIN(out), back[n] - front[n])       |
-| `0x00120000` | Running rate-limited smoothing filter / Peak Clamper ?                 | out[n] = min(in[n], max(in[0..n−1])); out[0] = in[0] |
-| `0x00130000` | running max extrema filters                                            | out[n] = max(LASTMIN(out), back[n] - front[n])       |
+| Opcode       | Operation                                                              | Expression                                             |
+|:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------------|
+| `0x00100000` | Running max                                                            | `out[n] = max(out[n-1], in[n])`                        |
+| `0x00110000` | running min extrema filters                                            | `out[n] = min(LASTMIN(out), back[n] - front[n])`       |
+| `0x00120000` | Running rate-limited smoothing filter / Peak Clamper ?                 | `out[n] = min(in[n], max(in[0..n−1])); out[0] = in[0]` |
+| `0x00130000` | running max extrema filters                                            | `out[n] = max(LASTMIN(out), back[n] - front[n])`       |
+
+### 0x00008000 to 0x000f8000
+
+| Opcode       | Operation                                                              | Expression                                               |
+|:-------------|:-----------------------------------------------------------------------|:---------------------------------------------------------|
+| `0x00008000` | Passthrough                                                            | `back[n]`                                                |
+| `0x00018000` | Subtract back buffer from front buffer and right shift                 | `(front[n] - back[n]) >> k`                              |
+| `0x00028000` | Same as previous one                                                   |                                                          |
+| `0x00038000` | Accumulate front and back buffers                                      | `(front[n] + back[n])`                                   |
+| `0x00048000` | Subtract back buffer from front buffer and add constant b              | `(front[n] - back[n]) + b`                               |
+| `0x00058000` | Add second 8-bit channel components and scale result                   | `(((0xFF00 & front[n]) + (0xFF00 & back[n])) >> 8) << k` |
+| `0x00068000` | *unknown*                                                              |                                                          |
+| `0x00078000` | Minimum of front and back buffers                                      | `min(back[n], front[n])`                                 |
+| `0x00088000` | Constant                                                               | `b`                                                      |
+| `0x00098000` | Left shift constant b by back buffer value                             | `(b << back[n])`                                         |
+| `0x000a8000` |                                                                        |                                                          |
+| `0x000b8000` |                                                                        |                                                          |
+| `0x000c8000` |                                                                        |                                                          |
+| `0x000d8000` |                                                                        |                                                          |
+| `0x000e8000` |                                                                        |                                                          |
+| `0x000f8000` |                                                                        |                                                          |
 
 ### 0x00140000 to 0x001f0000
 
