@@ -53,9 +53,9 @@ The composition of a Process Element is as follows:
 | DST_PARAM_2      | Additional local transformations applied on the destination: <br>offset shift, reserved, unknown, depends on the local config                                                                                                 | `(config << 16 \| value)`             |
 | DST_PARAM_3      | Additional local process applied on the destination: <br>sync, unknown, depends on the local config                                                                                                                           | `(config << 16 \| value)`             |
 
-## Operations
+### Operations
 
-### Generics
+#### Generics
 
 | Opcode       | Operation                                                              | Expression                                    |
 |:-------------|:-----------------------------------------------------------------------|:----------------------------------------------|
@@ -76,7 +76,7 @@ The composition of a Process Element is as follows:
 | `0x000e4000` | Exclusive OR                                                           | `(x ^ b)`                                     |
 | `0x000f4000` | Non-zero test                                                          | `(x != 0)`                                    |
 
-### Multiply / MACs
+#### Multiply / MACs
 
 | Opcode       | Operation                                  | Expression                                    |
 |:-------------|:-------------------------------------------|:----------------------------------------------|
@@ -85,7 +85,7 @@ The composition of a Process Element is as follows:
 | `0x00208000` | Multiply-negate with shift                 | `(-(back[n] * front[n])) >> k`                |
 | `0x0020c000` | Multiply-negate by constant with shift     | `(-(back[n] * b)) >> k`                       |
 
-### Inter-buffer
+#### Inter-buffer
 
 | Opcode       | Operation                                                         | Expression                              |
 |:-------------|:------------------------------------------------------------------|:----------------------------------------|
@@ -105,9 +105,10 @@ The composition of a Process Element is as follows:
 | `0x000e0000` | Bitwise XOR of back and front buffer                              | `back[n] ^ front[n]`                    |
 | `0x000f0000` | *Unknown*                                                         |                                         |
 
-## WIP
 
-### Runners
+**WIP**  
+
+#### Runners
 
 | Opcode       | Operation                                                              | Expression                                             |
 |:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------------|
@@ -116,7 +117,7 @@ The composition of a Process Element is as follows:
 | `0x00120000` | Running rate-limited smoothing filter / Peak Clamper ?                 | `out[n] = min(in[n], max(in[0..n−1])); out[0] = in[0]` |
 | `0x00130000` | running max extrema filters                                            | `out[n] = max(LASTMIN(out), back[n] - front[n])`       |
 
-### 0x00008000 to 0x000f8000
+#### 0x00008000 to 0x000f8000
 
 | Opcode       | Operation                                                              | Expression                                               |
 |:-------------|:-----------------------------------------------------------------------|:---------------------------------------------------------|
@@ -137,7 +138,7 @@ The composition of a Process Element is as follows:
 | `0x000e8000` |                                                                        |                                                          |
 | `0x000f8000` |                                                                        |                                                          |
 
-### 0x00140000 to 0x001f0000
+#### 0x00140000 to 0x001f0000
 
 | Opcode       | Operation                                                              | Expression                                           |
 |:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
@@ -154,10 +155,15 @@ The composition of a Process Element is as follows:
 | `0x001e0000` |                                                                        | (back[n] - front[n]) + a                             |
 | `0x001f0000` |                                                                        | (front[n] - back[n]) + b                             |
 
-### 0x0000c000 to ?
+#### 0x0000c000 to ?
 | Opcode       | Operation                                                              | Expression                                       |
 |:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------|
 | `0x0000c000` | Constant                                                               | b                                                |
 
+### Libraries
+
+See the following libraries for using the VME and for code examples:  
+[PSP Media Engine Custom Core](https://github.com/mcidclan/psp-media-engine-custom-core)  
+[PSP Media Engine Safe Task](https://github.com/mcidclan/psp-media-engine-safe-task)  
 
 *mcidclan, m-c/d 2026*
