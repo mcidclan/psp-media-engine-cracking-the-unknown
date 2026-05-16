@@ -78,12 +78,43 @@ The composition of a Process Element is as follows:
 
 #### Multiply / MACs
 
-| Opcode       | Operation                                  | Expression                                    |
-|:-------------|:-------------------------------------------|:----------------------------------------------|
-| `0x00200000` | Multiply back and front buffers with shift | `(back[n] * front[n]) >> k`                   |
-| `0x00204000` | Multiply by constant with shift            | `(back[n] * b) >> k`                          |
-| `0x00208000` | Multiply-negate with shift                 | `(-(back[n] * front[n])) >> k`                |
-| `0x0020c000` | Multiply-negate by constant with shift     | `(-(back[n] * b)) >> k`                       |
+| Opcode       | Operation                                        | Expression                                    |
+|:-------------|:-------------------------------------------------|:----------------------------------------------|
+| `0x00200000` | Multiply back and front buffers with shift       | `(back[n] * front[n]) >> k`                   |
+| `0x00201000` | Seems to be the same as the previous one (Ssapo) |                                               |
+| `0x00202000` | Ssapo                                            |                                               |
+| `0x00203000` | Ssapo                                            |                                               |
+| `0x00204000` | Multiply by constant with shift                  | `(back[n] * b) >> k`                          |
+| `0x00205000` | Ssapo                                            |                                               |
+| `0x00206000` | Ssapo                                            |                                               |
+| `0x00207000` | Ssapo                                            |                                               |
+| `0x00208000` | Multiply-negate with shift                       | `(-(back[n] * front[n])) >> k`                |
+| `0x00209000` | Ssapo                                            |                                               |
+| `0x0020a000` | Ssapo                                            |                                               |
+| `0x0020b000` | Ssapo                                            |                                               |
+| `0x0020c000` | Multiply-negate by constant with shift           | `(-(back[n] * b)) >> k`                       |
+| `0x0020d000` | Ssapo                                            |                                               |
+| `0x0020e000` | Ssapo                                            |                                               |
+| `0x0020f000` | Ssapo                                            |                                               |
+
+| Opcode       | Operation                                        | Expression                                    |
+|:-------------|:-------------------------------------------------|:----------------------------------------------|
+| `0x00210000` | Delayed Scalar Multiply-Shift                    | `(x[n] * x[n-1]) >> k` with `x[-1] = b`       |
+| `0x00220000` | Vector Multiply-Shift                            | `(back[n] * front[n]) >> k`                   |
+| `0x00230000` | Negated Vector Multiply-Shift                    | `-((front[n] * back[n]) >> k)`                |
+| `0x00240000` | Inner Product VMAC with Bias                     | `(Σn back[n] * front[n] + b) >> k`            |
+| `0x00250000` | Temporal MAC with Bias Shift                     | `((y[n-1] + x[n]) + b) >> k`                  |
+| `0x00260000` | Scalar Multiply-Shift with Bias                  | `((a * x[n]) + b) >> k`                       |
+| `0x00270000` | Vector Multiply-Shift with Bias                  | `(back[n] * front[n]) + b) >> k`              |
+| `0x00280000` |                                                  | `  `                                          |
+| `0x00290000` |                                                  | `  `                                          |
+| `0x002a0000` |                                                  | `  `                                          |
+| `0x002b0000` |                                                  | `  `                                          |
+| `0x002c0000` |                                                  | `  `                                          |
+| `0x002d0000` |                                                  | `  `                                          |
+| `0x002e0000` |                                                  | `  `                                          |
+| `0x002f0000` |                                                  | `  `                                          |
+
 
 #### Inter-buffer
 
