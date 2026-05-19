@@ -10,7 +10,8 @@ The components of interest in this experimental investigation are primarily the 
 ## The VME Itself
 
 - Cracking the unknown around [The PSP Virtual Mobile Engine](the-virtual-mobile-engine.md)
-- Documentation to help processing over [The VME Bitstream/Context and DataPath](the-vme-bitstream-and-datapath.md)
+- Documentation on the VME [VME Documentation](the-vme-bitstream-and-datapath.md)  
+  *Including Opcodes, Processing Elements, Bitstream/Context, and DataPath.*
 
 ## Special Move To and From Instructions
 
@@ -22,9 +23,7 @@ The components of interest in this experimental investigation are primarily the 
 
 ## Testing Context
 
-It is important to note that these early tests have so far been conducted on a PSP Slim running CFW 6.61 Pro-C.  
-
-Iterations were performed through PSPLINK in order to reduce time consumption and simplify the testing process. However, note that when using PSPLINK, some initial states could differ from a normal eboot launch, for example when testing the VME bitstream.  
+The tests have been conducted on a PSP Slim running CFW 6.61 Pro-C. Iterations were performed through PSPLINK in order to reduce time consumption and simplify the testing process. However, note that when using PSPLINK, some initial states could differ from a normal eboot launch, for example when testing the VME bitstream.  
 
 ## Disclamer
 This project is provided for educational and research purposes only. This project and code are provided as-is without warranty. Users assume full responsibility for any implementation or consequences. Use at your own discretion and risk
