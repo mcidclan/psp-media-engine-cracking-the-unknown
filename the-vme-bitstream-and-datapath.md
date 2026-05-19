@@ -4,11 +4,14 @@ The VME features fine-grained control capabilities, meaning it can first be conf
 
 It appears to be more advanced than a simple audio processor. What the analysis of the Processing Elements exposes, through the DSP opcodes observed in use within them and the communication patterns between them, is a stream-oriented vector processing architecture capable of operating directly on internal buffers through inter-buffer operations, fixed-point MAC and branchless conditional transforms. The whole thing suggests a hardware pipeline optimized for real-time vector computation rather than classic scalar execution.
 
-The architecture operates on 24-bit two's complement data, therefore supporting the Q23 format. The internal accumulators are at least 48 bits wide and allow precise multiply-accumulate operations without immediate overflow. MAC instructions, variable shifts, implicit min/max, logical operations and conditional negations could potentially allow the implementation of fixed-point physics engines, 2D/3D matrix transforms, software rasterizers, complex DSP filters, audio synthesis, interpolation and geometry pipelines.
+The architecture operates on 24-bit two's complement data, therefore supporting the Q23 format. The internal accumulators are 64 bits wide and allow precise multiply-accumulate operations without immediate overflow. MAC instructions, variable shifts, implicit min/max, logical operations and conditional negations could potentially allow the implementation of fixed-point physics engines, 2D/3D matrix transforms, software rasterizers, complex DSP filters, audio synthesis, interpolation and geometry pipelines.
 
 The inter-buffer operations (front[n], back[n]) indicate a streamed vector processing capability where complete data blocks can be staged and transformed within the pipeline with very little software overhead. The 8 KB internal buffers (Base/Top) suggest a dedicated fast local SRAM that could serve as a vertex cache, scanline buffer, audio sample store, or even a physics data scratch space.
 
 The following is an attempt to explain how the VME pipeline works.
+
+
+*Note: All of the following observations were made on real PSP Slim hardware.*
 
 ### Pipeline
 
@@ -26,6 +29,9 @@ The following is an attempt to explain how the VME pipeline works.
 
 **DST_PARAM_2 / DST_PARAM_3 sync**  
 DST_PARAM_3 = 0x00200000 seems to enable a sync mode. Without it DST_PARAM_2 has no effect. DST_PARAM_2 value field (lower 16 bits) is a word offset introducing a padding representing the pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.
+
+**Internal Accumulator**
+The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.
 
 ### Process Element
 
@@ -72,7 +78,7 @@ The composition of a Process Element is as follows:
 | `0x00054000` | Shift and subtract                                                     | `(x >> b) - a`                                |
 | `0x00064000` | Conditional negation                                                   | `(x & a) != 0 ? x : NEG(x)` *(~x + 1)*        |
 | `0x00074000` | Subtract immediate and left shift                                      | `(x - b) << k`                                |
-| `0x00084000` | Negative product of back[n] and front[n] if front[n] ∈ [-2, 2], else 0 | `-(back[n] * front[n]) * 1[−2,2]​(front[n])`   |
+| `0x00084000` | Negative product of back[n] and front[n] if front[n] ∈ [-2, 2], else 0 | `-(back[n] * front[n]) * 1[-2,2]​(front[n])`   |
 | `0x00094000` | *Unknown*                                                              |                                               |
 | `0x000a4000` | Left shift                                                             | `(x << b)`                                    |
 | `0x000b4000` | Left shift (unclear)                                                   | `(x << b)`                                    |
@@ -81,7 +87,7 @@ The composition of a Process Element is as follows:
 | `0x000e4000` | Exclusive OR                                                           | `(x ^ b)`                                     |
 | `0x000f4000` | Non-zero test                                                          | `(x != 0)`                                    |
 
-#### Multiply / MACs
+#### Multiply / MACs / Filters
 
 | Opcode       | Operation                                        | Expression                                    |
 |:-------------|:-------------------------------------------------|:----------------------------------------------|
@@ -102,23 +108,23 @@ The composition of a Process Element is as follows:
 | `0x0020e000` | Ssapo                                            |                                               |
 | `0x0020f000` | Ssapo                                            |                                               |
 
-| Opcode       | Operation                                        | Expression                                    |
-|:-------------|:-------------------------------------------------|:----------------------------------------------|
-| `0x00210000` | Delayed Scalar Multiply-Shift                    | `(x[n] * x[n-1]) >> k` with `x[-1] = b`       |
-| `0x00220000` | Vector Multiply-Shift                            | `(back[n] * front[n]) >> k`                   |
-| `0x00230000` | Negated Vector Multiply-Shift                    | `-((front[n] * back[n]) >> k)`                |
-| `0x00240000` | Inner Product VMAC with Bias                     | `(Σn back[n] * front[n] + b) >> k`            |
-| `0x00250000` | Temporal MAC with Bias Shift                     | `((y[n-1] + x[n]) + b) >> k`                  |
-| `0x00260000` | Scalar Multiply-Shift with Bias                  | `((a * x[n]) + b) >> k`                       |
-| `0x00270000` | Vector Multiply-Shift with Bias                  | `(back[n] * front[n]) + b) >> k`              |
-| `0x00280000` |                                                  | `  `                                          |
-| `0x00290000` |                                                  | `  `                                          |
-| `0x002a0000` |                                                  | `  `                                          |
-| `0x002b0000` |                                                  | `  `                                          |
-| `0x002c0000` |                                                  | `  `                                          |
-| `0x002d0000` |                                                  | `  `                                          |
-| `0x002e0000` |                                                  | `  `                                          |
-| `0x002f0000` |                                                  | `  `                                          |
+| Opcode       | Operation                                        | Expression                                                            |
+|:-------------|:-------------------------------------------------|:----------------------------------------------------------------------|
+| `0x00210000` | Delayed Scalar Multiply-Shift                    | `(x[n] * x[n-1]) >> k` with `x[-1] = b`                               |
+| `0x00220000` | Vector Multiply-Shift                            | `(back[n] * front[n]) >> k`                                           |
+| `0x00230000` | Negated Vector Multiply-Shift                    | `-((front[n] * back[n]) >> k)`                                        |
+| `0x00240000` | Inner Product VMAC with Bias                     | `(Σn(back[n] * front[n]) + b) >> k`                                   |
+| `0x00250000` | Temporal MAC with Bias Shift                     | `((y[n-1] + x[n]) + b) >> k`                                          |
+| `0x00260000` | Scalar Multiply-Shift with Bias                  | `((a * x[n]) + b) >> k`                                               |
+| `0x00270000` | Vector Multiply-Shift with Bias                  | `(back[n] * front[n]) + b) >> k`                                      |
+| `0x00280000` | Delayed Feedback IIR Accumulator                 | `0 if n < 2 else ((out[n-1] + front[n-2] + back[n-2]) >> k) + a`      |
+| `0x00290000` | 4-Tap Delayed FIR Convolution Filter             | `(Σ{m=0...3}(back[m] * front[n-3-m]) >> k) + a`                       |
+| `0x002a0000` | Same as `0x00280000`?                            |                                                                       |
+| `0x002b0000` | *unknown*                                        |                                                                       |
+| `0x002c0000` | *unknown*                                        |                                                                       |
+| `0x002d0000` | *unknown*                                        |                                                                       |
+| `0x002e0000` | *unknown*                                        |                                                                       |
+| `0x002f0000` | *unknown*                                        |                                                                       |
 
 
 #### Inter-buffer
@@ -167,7 +173,8 @@ The composition of a Process Element is as follows:
 | `0x00078000` | Minimum of front and back buffers                                      | `min(back[n], front[n])`                                 |
 | `0x00088000` | Constant                                                               | `b`                                                      |
 | `0x00098000` | Left shift constant b by back buffer value                             | `(b << back[n])`                                         |
-| `0x000a8000` |                                                                        |                                                          |
+
+| `0x000a8000` |                                                                        | `back[n] ROR.64 front[n]`                                |
 | `0x000b8000` |                                                                        |                                                          |
 | `0x000c8000` |                                                                        |                                                          |
 | `0x000d8000` |                                                                        |                                                          |
