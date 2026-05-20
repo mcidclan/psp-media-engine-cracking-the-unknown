@@ -181,7 +181,7 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 | `0x00078000` | Minimum of front and back buffers                                      | `min(back[n], front[n])`                                 |
 | `0x00088000` | Constant                                                               | `b`                                                      |
 | `0x00098000` | Left shift constant b by back buffer value                             | `(b << back[n])`                                         |
-| `0x000a8000` |                                                                        | `back[n] ROR.64 front[n]`                                |
+| `0x000a8000` |                                                                        | `back[n] ROR.64 front[n]`  (requires new tests)          |
 | `0x000b8000` |                                                                        |                                                          |
 | `0x000c8000` |                                                                        |                                                          |
 | `0x000d8000` |                                                                        |                                                          |
