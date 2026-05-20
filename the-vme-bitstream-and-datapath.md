@@ -25,13 +25,6 @@ The following is an attempt to explain how the VME pipeline works.
 - A PE can explicitly process data by applying ALU operations on its input, including arithmetic, bitwise logic, shifts and conditional operations. This behavior must be configured through the DESCRIPTOR node.
 - Independently of any computation, a PE always has a structural role through its source and destination configuration, covering routing, offsets, word counts, local transformations and synchronization, among other capabilities that are not yet fully understood.
 
-#### Technical Observations
-
-**DST_PARAM_2 / DST_PARAM_3 sync**  
-DST_PARAM_3 = 0x00200000 seems to enable a sync mode. Without it DST_PARAM_2 has no effect. DST_PARAM_2 value field (lower 16 bits) is a word offset introducing a padding representing the pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.
-
-**Internal Accumulator**
-The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.
 
 ### Process Element
 
@@ -39,7 +32,7 @@ The composition of a Process Element is as follows:
 
 | Register         | Description                                                                                                                                                                                                                        | Format                                |
 |:-----------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------|
-| TOP_DESCRIPTOR   | Description of the DSP process to apply, <br>starting with the index of the secondary source used <br>to compute against the current buffer data, <br>followed by the operation opcode and the k register value                    | `(index << 28 \| opcode << 8 \| k)`   |
+| TOP_DESCRIPTOR   | Description of the DSP process to apply, <br>starting with the index of the secondary source used <br>to compute against the current buffer data, <br>followed by the operation opcode and the k register value                    | `(indexes << 24 \| opcode << 6 \| k)` |
 | TOP_REGISTER_A   | The 'a' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                    | `a`                                   |
 | TOP_REGISTER_B   | The 'b' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                    | `b`                                   |
 | TOP_SRC          | Routing to the 'top' source targeted by the <br>current Process Element, including the offset (in words) <br>from where to start                                                                                                   | `(routing << 16 \| offset)`           |
@@ -63,6 +56,18 @@ The composition of a Process Element is as follows:
 | DST_PARAM_1      | Additional local transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                          | `(config << 16 \| value)`             |
 | DST_PARAM_2      | Additional local transformations applied on the destination: <br>offset shift, reserved, unknown, depends on the local config                                                                                                      | `(config << 16 \| value)`             |
 | DST_PARAM_3      | Additional local process applied on the destination: <br>sync, unknown, depends on the local config / PE end token                                                                                                                 | `(config << 16 \| value)`             |
+
+
+### Technical Observations
+
+**DST_PARAM_2 / DST_PARAM_3 sync**  
+DST_PARAM_3 = 0x00200000 seems to enable a sync mode. Without it DST_PARAM_2 has no effect. DST_PARAM_2 value field (lower 16 bits) is a word offset introducing a padding representing the pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.
+
+**Internal Accumulator**
+The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.
+
+**TOP_DESCRIPTOR***
+For now we have the following format for the TOP_DESCRIPTOR: `FI << 28 | BI << 24 | Opcode << 12 | unknown << 6 | k`, where FI is the front buffer index, BI is the back buffer index, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (For example after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself.
 
 ### Operations
 
