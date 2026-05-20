@@ -60,14 +60,17 @@ The composition of a Process Element is as follows:
 
 ### Technical Observations
 
-**DST_PARAM_2 / DST_PARAM_3 sync**  
-DST_PARAM_3 = 0x00200000 seems to enable a sync mode. Without it DST_PARAM_2 has no effect. DST_PARAM_2 value field (lower 16 bits) is a word offset introducing a padding representing the pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.
+#### Parameters and Sync
+DST_PARAM_3 = 0x00200000 seems to enable a sync mode. Without it DST_PARAM_2 has no effect. DST_PARAM_2 value field (lower 16 bits) is a word offset introducing a padding representing the pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.  
 
-**Internal Accumulator**
-The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.
+#### Internal Accumulator
+The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.  
 
-**TOP_DESCRIPTOR***
-For now we have the following format for the TOP_DESCRIPTOR: `FI << 28 | BI << 24 | Opcode << 12 | unknown << 6 | k`, where FI is the front buffer index, BI is the back buffer index, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (For example after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself.
+#### Descriptors
+For now we have the following observed format for the TOP and BASE descriptors: `FRI << 28 | BRI << 24 | Opcode << 12 | unknown << 6 | k`, where FRI is the front buffer routing index, BRI is the back buffer routing index, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (for example, after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself. In any case, more tests need to be done to clarify the bits.
+
+#### Back and Front Buffers
+In the following, what is referred to as the Back buffer is the buffer routed to the current TOP_SOURCE, over which the Front buffer will be processed.
 
 ### Operations
 
