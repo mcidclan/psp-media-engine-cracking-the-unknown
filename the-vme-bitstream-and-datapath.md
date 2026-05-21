@@ -74,6 +74,8 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 
 ### Operations
 
+Using the following opcodes, the Back and Front buffers both appear to be routed to `0x44020000` by default. FRI and BRI must be modified to change the routing.
+
 #### Generics
 
 | Opcode       | Operation                                                              | Expression                                    |
@@ -100,30 +102,31 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 | Opcode       | Operation                                        | Expression                                    |
 |:-------------|:-------------------------------------------------|:----------------------------------------------|
 | `0x00200000` | Multiply back and front buffers with shift       | `(back[n] * front[n]) >> k`                   |
-| `0x00201000` | Seems to be the same as the previous one (Ssapo) |                                               |
-| `0x00202000` | Ssapo                                            |                                               |
-| `0x00203000` | Ssapo                                            |                                               |
+| `0x00201000` | Same as the previous one?                        |                                               |
+| `0x00202000` | Same as the previous one?                        |                                               |
+| `0x00203000` | Same as the previous one?                        |                                               |
 | `0x00204000` | Multiply by constant with shift                  | `(back[n] * b) >> k`                          |
-| `0x00205000` | Ssapo                                            |                                               |
-| `0x00206000` | Ssapo                                            |                                               |
-| `0x00207000` | Ssapo                                            |                                               |
+| `0x00205000` | Same as the previous one?                        |                                               |
+| `0x00206000` | Same as the previous one?                        |                                               |
+| `0x00207000` | Same as the previous one?                        |                                               |
 | `0x00208000` | Multiply-negate with shift                       | `(-(back[n] * front[n])) >> k`                |
-| `0x00209000` | Ssapo                                            |                                               |
-| `0x0020a000` | Ssapo                                            |                                               |
-| `0x0020b000` | Ssapo                                            |                                               |
+| `0x00209000` | Same as the previous one?                        |                                               |
+| `0x0020a000` | Same as the previous one?                        |                                               |
+| `0x0020b000` | Same as the previous one?                        |                                               |
 | `0x0020c000` | Multiply-negate by constant with shift           | `(-(back[n] * b)) >> k`                       |
-| `0x0020d000` | Ssapo                                            |                                               |
-| `0x0020e000` | Ssapo                                            |                                               |
-| `0x0020f000` | Ssapo                                            |                                               |
+| `0x0020d000` | Same as the previous one?                        |                                               |
+| `0x0020e000` | Same as the previous one?                        |                                               |
+| `0x0020f000` | Same as the previous one?                        |                                               |
 
 | Opcode       | Operation                                        | Expression                                                            |
 |:-------------|:-------------------------------------------------|:----------------------------------------------------------------------|
+| `0x00200000` | Multiply back and front buffers with shift       | `(back[n] * front[n]) >> k`                                           |
 | `0x00210000` | Delayed Scalar Multiply-Shift                    | `(x[n] * x[n-1]) >> k` with `x[-1] = b`                               |
 | `0x00220000` | Vector Multiply-Shift                            | `(back[n] * front[n]) >> k`                                           |
 | `0x00230000` | Negated Vector Multiply-Shift                    | `-((front[n] * back[n]) >> k)`                                        |
-| `0x00240000` | Inner Product VMAC with Bias                     | `(Σn(back[n] * front[n]) + b) >> k`                                   |
+| `0x00240000` | Inner Product running VMAC with Bias             | `(Σn(back[n] * front[n]) + b) >> k`                                   |
 | `0x00250000` | Temporal MAC with Bias Shift                     | `((y[n-1] + x[n]) + b) >> k`                                          |
-| `0x00260000` | Scalar Multiply-Shift with Bias                  | `((a * x[n]) + b) >> k`                                               |
+| `0x00260000` | Scalar Multiply-Shift with Bias                  | `((a * n) + b) >> k`                                                  |
 | `0x00270000` | Vector Multiply-Shift with Bias                  | `(back[n] * front[n]) + b) >> k`                                      |
 | `0x00280000` | Delayed Feedback IIR Accumulator                 | `0 if n < 2 else ((out[n-1] + front[n-2] + back[n-2]) >> k) + a`      |
 | `0x00290000` | 4-Tap Delayed FIR Convolution Filter             | `(Σ{m=0...3}(back[m] * front[n-3-m]) >> k) + a`                       |
@@ -133,6 +136,30 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 | `0x002d0000` | *unknown*                                        |                                                                       |
 | `0x002e0000` | *unknown*                                        |                                                                       |
 | `0x002f0000` | *unknown*                                        |                                                                       |
+
+
+**0x00a00000 or (0x00800000 | 0x00200000)**  
+
+| Opcode       | Operation                                                     | Expression                                                       | Duplicate |
+|:-------------|:--------------------------------------------------------------|:-----------------------------------------------------------------|:----------|
+| `0x00a00000` | *unclear*                                                     | `(back[n] * front[n]) >> k`                                      | yes       |
+| `0x00a10000` | *unclear*                                                     | `front[n] * front[n-1] + ((!(n % 4) && n) ? front[n-1] / 3 : 0)` | no        |
+| `0x00a20000` | same as 0x00a00000?                                           |                                                                  | yes       |
+| `0x00a30000` | *unclear*                                                     | `-((back[n] * front[n]) >> k)`                                   | yes       |
+| `0x00a40000` | *unclear*                                                     | `(Σn(back[n] * front[n]) + b) >> k`                              | yes       |
+| `0x00a50000` | *unclear*                                                     | `(Σn(front[0..n]) + b) >> k`                                     | no        |
+| `0x00a60000` | *unclear*                                                     | `((n * a) + b) >> k`                                             | yes       |
+| `0x00a70000` | *unclear*                                                     | `(back[n] * front[n]) + b) >> k`                                 | yes       |
+| `0x00a80000` | *unclear*                                                     | `0 if n < 2 else ((out[n-1] + front[n-2] + back[n-2]) >> k) + a` | yes       |
+| `0x00a90000` | *unclear*                                                     | `(Σ{m=0...3}(back[m] * front[n-3-m]) >> k) + a`                  | yes       |
+| `0x00aa0000` |  Same as `0x00a80000`?                                        |                                                                  | yes       |
+| `0x00ab0000` | *unknown*                                                     |                                                                  |           |
+| `0x00ac0000` | *unknown*                                                     |                                                                  |           |
+| `0x00ad0000` | *unknown*                                                     |                                                                  |           |
+| `0x00ae0000` | *unknown*                                                     |                                                                  |           |
+| `0x00af0000` | *unknown*                                                     |                                                                  |           |
+
+*Note: using this opcode, or when OR'ing `0x00800000` with another opcode, the Back and Front buffers appear to be respectively routed to `0x44020000` and `0x44020800`.*
 
 
 #### Inter-buffer
@@ -147,16 +174,13 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 | `0x00060000` | Conditional negation of back buffer based on front buffer mask    | `(front[n] & a) ? -back[n] : back[n]`   |
 | `0x00070000` | Shift back buffer left by k and add constant                      | `(back[n] << k) + b`                    |
 | `0x00080000` | Clamped multiply of back buffer by front buffer                   | `clamp(back[n], NEG2, POS2) * front[n]` |
-| `0x00090000` | *Unknown*                                                         |                                         |
+| `0x00090000` | *unclear*                                                         | ``                                      |
 | `0x000a0000` | Shift back buffer left by front buffer value                      | `back[n] << front[n]`                   |
 | `0x000b0000` | Same as the previous one?                                         |                                         |
 | `0x000c0000` | Minimum of back and front buffer                                  | `min(back[n], front[n])`                |
 | `0x000d0000` | Bitwise OR of back and front buffer                               | `back[n] \| front[n]`                   |
 | `0x000e0000` | Bitwise XOR of back and front buffer                              | `back[n] ^ front[n]`                    |
 | `0x000f0000` | *Unknown*                                                         |                                         |
-
-
-**WIP**  
 
 #### Runners
 
@@ -166,6 +190,24 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 | `0x00110000` | running min extrema filters                                            | `out[n] = min(LASTMIN(out), back[n] - front[n])`       |
 | `0x00120000` | Running rate-limited smoothing filter <br>Peak Clamper ?               | `out[n] = min(in[n], max(in[0..n−1])); out[0] = in[0]` |
 | `0x00130000` | running max extrema filters                                            | `out[n] = max(LASTMIN(out), back[n] - front[n])`       |
+
+| Opcode       | Operation                                                              | Expression                                           |
+|:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
+| `0x00140000` | *unclear*                                                              | max(back[n], front[n])                               |
+| `0x00150000` | *unknown*                                                              |                                                      |
+| `0x00160000` | *unknown*                                                              |                                                      |
+| `0x00170000` |                                                                        | (back[n] - a)                                        |
+| `0x00180000` | *unknown*                                                              |                                                      |
+| `0x00190000` | *unknown*                                                              |                                                      |
+| `0x001a0000` | *unknown*                                                              |                                                      |
+| `0x001b0000` | Constant                                                               | b                                                    |
+| `0x001c0000` | Add back buffer to front buffer                                        | (back[n] + front[n])                                 |
+| `0x001d0000` | *unknown*                                                              |                                                      |
+| `0x001e0000` |                                                                        | (back[n] - front[n]) + a                             |
+| `0x001f0000` |                                                                        | (front[n] - back[n]) + b                             |
+
+
+**WIP**  
 
 #### 0x00008000 to 0x000f8000
 
@@ -187,23 +229,6 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 | `0x000d8000` |                                                                        |                                                          |
 | `0x000e8000` |                                                                        |                                                          |
 | `0x000f8000` |                                                                        |                                                          |
-
-#### 0x00140000 to 0x001f0000
-
-| Opcode       | Operation                                                              | Expression                                           |
-|:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
-| `0x00140000` | *unknown*                                                              |                                                      |
-| `0x00150000` | *unknown*                                                              |                                                      |
-| `0x00160000` | *unknown*                                                              |                                                      |
-| `0x00170000` |                                                                        | (back[n] - a)                                        |
-| `0x00180000` | *unknown*                                                              |                                                      |
-| `0x00190000` | *unknown*                                                              |                                                      |
-| `0x001a0000` | *unknown*                                                              |                                                      |
-| `0x001b0000` | Constant                                                               | b                                                    |
-| `0x001c0000` | Add back buffer to front buffer                                        | (back[n] + front[n])                                 |
-| `0x001d0000` | *unknown*                                                              |                                                      |
-| `0x001e0000` |                                                                        | (back[n] - front[n]) + a                             |
-| `0x001f0000` |                                                                        | (front[n] - back[n]) + b                             |
 
 #### 0x0000c000 to ?
 | Opcode       | Operation                                                              | Expression                                       |
