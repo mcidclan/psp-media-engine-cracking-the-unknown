@@ -72,6 +72,28 @@ For now we have the following observed format for the TOP and BASE descriptors: 
 #### Back and Front Buffers
 In the following, what is referred to as the Back buffer is the buffer routed to the current TOP_SOURCE, over which the Front buffer will be processed. It is worth noting that the Front buffer appears to be routable to any Base or Top buffer available in the ranges `0x44000000` or `0x44020000` using the FRI related bits.
 
+#### Globals
+
+**INPUT_CROSSBAR** maps 8 source buffers to PE inputs in the following layout:
+```text
+  [PE3:8] [PE2:8] [PE1:8] [PE0:8]
+```
+Each byte encodes:
+```text
+  [front index routing:4 | back index routing:4]
+```
+
+**INTER_CROSSBAR** maps PEs between them. Each nibble selects the source PE index for a target PE lane:
+```text
+  [PE3:4] [PE2:4] [PE1:4] [PE0:4]
+```
+Each nibble encodes:
+```text
+  [PE index routing:4]
+```
+
+
+
 ### Operations
 
 Using the following opcodes, the Back and Front buffers both appear to be routed to `0x44020000` by default. FRI and BRI must be modified to change the routing.
