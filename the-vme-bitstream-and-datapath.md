@@ -39,7 +39,7 @@ The composition of a Process Element is as follows:
 | TOP_COUNT        | Number of words - 1 to read from the 'top' source                                                                                                                                                                                  | `(config << 16 \| count)`             |
 | TOP_PARAM_0      | Additional local transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                         | `(config << 16 \| value)`             |
 | TOP_PARAM_1      | Additional local transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                         | `(config << 16 \| value)`             |
-| TOP_PARAM_2      | Additional local transformations applied on the 'top' source: <br>offset shift, reserved, unknown, depends on the local config                                                                                                     | `(config << 16 \| value)`             |
+| TOP_PARAM_2      | Additional local transformations applied on the 'top' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                      | `(config << 16 \| value)`             |
 | TOP_PARAM_3      | Additional local process applied on the 'top' source: sync, <br>unknown, depends on the local config                                                                                                                               | `(config << 16 \| value)`             |
 | BASE_DESCRIPTOR  | Description of the DSP process to apply on the base source, <br>starting with the index of the secondary source used to <br>compute against the current buffer data, <br>followed by the operation opcode and the k register value | `(index << 28 \| opcode << 8 \| k)`   |
 | BASE_REGISTER_A  | The 'a' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                   | `a`                                   |
@@ -48,20 +48,23 @@ The composition of a Process Element is as follows:
 | BASE_COUNT       | Number of words - 1 to read from the 'base' source                                                                                                                                                                                 | `(config << 16 \| count)`             |
 | BASE_PARAM_0     | Additional local transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                        | `(config << 16 \| value)`             |
 | BASE_PARAM_1     | Additional local transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                        | `(config << 16 \| value)`             |
-| BASE_PARAM_2     | Additional local transformations applied on the 'base' source: <br>offset shift, reserved, unknown, depends on the local config                                                                                                    | `(config << 16 \| value)`             |
+| BASE_PARAM_2     | Additional local transformations applied on the 'base' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                     | `(config << 16 \| value)`             |
 | BASE_PARAM_3     | Additional local process applied on the 'base' source: <br>sync, unknown, depends on the local config                                                                                                                              | `(config << 16 \| value)`             |
 | DST              | Routing to the destination targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                    | `(routing << 16 \| offset)`           |
 | DST_COUNT        | Number of words - 1 to write to the destination                                                                                                                                                                                    | `(config << 16 \| count)`             |
 | DST_PARAM_0      | Additional local transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                          | `(config << 16 \| value)`             |
 | DST_PARAM_1      | Additional local transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                          | `(config << 16 \| value)`             |
-| DST_PARAM_2      | Additional local transformations applied on the destination: <br>offset shift, reserved, unknown, depends on the local config                                                                                                      | `(config << 16 \| value)`             |
+| DST_PARAM_2      | Additional local transformations applied on the destination: <br>offset shift, reverse, unknown, depends on the local config                                                                                                       | `(config << 16 \| value)`             |
 | DST_PARAM_3      | Additional local process applied on the destination: <br>sync, unknown, depends on the local config / PE end token                                                                                                                 | `(config << 16 \| value)`             |
 
 
 ### Technical Observations
 
 #### Parameters and Sync
-DST_PARAM_3 = 0x00200000 seems to enable a sync mode. Without it DST_PARAM_2 has no effect. DST_PARAM_2 value field (lower 16 bits) is a word offset introducing a padding representing the pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.  
+`DST_PARAM_2` value field (lower 16 bits) is a word offset introducing a Word-Shift that could be used as a pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.  
+`DST_PARAM_2` with a value of `0x00210000` can be used to Replicate the first value of the current buffer across the entire buffer range count. This is useful for filling or clearing the buffer with a single value.
+`DST_PARAM_2` with a value of `0x10000000` can be used to Reverse the word order across the entire buffer range count.
+`DST_PARAM_3` with value `0x00200000` seems to enable a Sync mode. Without it DST_PARAM_2 Word-Shift has no effect.
 
 #### Internal Accumulator
 The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.  
@@ -97,7 +100,6 @@ Each nibble encodes:
 *Note: this mapping appears to be used for inter-PE datapath configuration inheritance, covering routing and associated control parameters.*
 
 **CROSSBAR_FLOW** selects which PE buffer stream is routed to the input of the currently targeted PE.
-
 ```text
   [PE3:4] [PE2:4] [PE1:4] [PE0:4]
 ```
@@ -105,6 +107,17 @@ Each nibble encodes:
 ```text
   [PE index routing:4]
 ```
+
+**CROSSBAR_SKEW** selects an input and applies a cycle skew to the data stream forwarded to the target PE.
+```text
+  back{[PE3:4] [PE2:4] [PE1:4] [PE0:4]} front{[PE3:4] [PE2:4] [PE1:4] [PE0:4]}
+```
+Each nibble encodes:
+```text
+  [PE skew code:4]
+```
+Skews:  
+`0b000` 0, `0b100` 1, `0b101` 2, `0b110` 3, `0b111` 4
 
 ### Operations
 
