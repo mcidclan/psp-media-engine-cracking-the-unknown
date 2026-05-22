@@ -74,7 +74,9 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 
 #### Globals
 
-**INPUT_CROSSBAR** maps 8 source buffers to PE inputs in the following layout:
+The following may be inaccurate, more testing is needed to confirm, clarify, or invalidate it.  
+
+**CROSSBAR_INPUT** maps the 8 buffers to PE inputs in the following layout:
 ```text
   [PE3:8] [PE2:8] [PE1:8] [PE0:8]
 ```
@@ -83,7 +85,7 @@ Each byte encodes:
   [front index routing:4 | back index routing:4]
 ```
 
-**INTER_CROSSBAR** maps PEs between them. Each nibble selects the source PE index for a target PE lane:
+**CROSSBAR_ARCH** maps inter-PE datapath configuration inheritance. Each nibble selects the source PE index for a target PE lane:
 ```text
   [PE3:4] [PE2:4] [PE1:4] [PE0:4]
 ```
@@ -92,7 +94,17 @@ Each nibble encodes:
   [PE index routing:4]
 ```
 
+*Note: this mapping appears to be used for inter-PE datapath configuration inheritance, covering routing and associated control parameters.*
 
+**CROSSBAR_FLOW** selects which PE buffer stream is routed to the input of the currently targeted PE.
+
+```text
+  [PE3:4] [PE2:4] [PE1:4] [PE0:4]
+```
+Each nibble encodes:
+```text
+  [PE index routing:4]
+```
 
 ### Operations
 
