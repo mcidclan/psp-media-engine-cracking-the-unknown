@@ -1,12 +1,12 @@
 ## The VME Bitstream/Context and DataPath Documentation
 
-The VME features fine-grained control capabilities, meaning it can first be configured with a coarse-grained bitstream/context for initial or full datapath setup, and then apply targeted updates to specific exposed datapath nodes.
+The VME features fine-grained control capabilities, it can first be configured with a coarse-grained bitstream/context for initial or full datapath setup, and then apply targeted updates to specific exposed datapath nodes.
 
-It appears to be more advanced than a simple audio processor. What the analysis of the Processing Elements exposes, through the DSP opcodes observed in use within them and the communication patterns between them, is a stream-oriented vector processing architecture capable of operating directly on internal buffers through inter-buffer operations, fixed-point MAC and branchless conditional transforms. The whole thing suggests a hardware pipeline optimized for real-time vector computation rather than classic scalar execution.
+It appears to be more advanced than a simple audio processor. The analysis of the Processing Elements, through the DSP opcodes used within them and the communication patterns between them, reveals a stream-oriented vector processing architecture capable of operating directly on internal buffers through inter-buffer operations, fixed-point MAC and branchless conditional transforms. All of this suggests a hardware pipeline optimized for real-time vector computation rather than classic scalar execution.
 
 The architecture operates on 24-bit two's complement data, therefore supporting the Q23 format. The internal accumulators are 64 bits wide and allow precise multiply-accumulate operations without immediate overflow. MAC instructions, variable shifts, implicit min/max, logical operations and conditional negations could potentially allow the implementation of fixed-point physics engines, 2D/3D matrix transforms, software rasterizers, complex DSP filters, audio synthesis, interpolation and geometry pipelines.
 
-The inter-buffer operations (front[n], back[n]) indicate a streamed vector processing capability where complete data blocks can be staged and transformed within the pipeline with very little software overhead. The 8 KB internal buffers (Base/Top) suggest a dedicated fast local SRAM that could serve as a vertex cache, scanline buffer, audio sample store, or even a physics data scratch space.
+The inter-buffer operations (front[n], back[n]) indicate a streamed vector processing capability where complete data blocks can be staged and transformed within the pipeline with very little software overhead. The local SRAM hosting the 8 KB internal buffers could serve as a vertex cache, scanline buffer, audio sample store, or even a physics scratchpad.
 
 The following is an attempt to explain how the VME pipeline works.
 
