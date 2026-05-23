@@ -60,11 +60,18 @@ The composition of a Process Element is as follows:
 
 ### Technical Observations
 
-#### Parameters and Sync
-`DST_PARAM_2` value field (lower 16 bits) is a word offset introducing a Word-Shift that could be used as a pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.  
-`DST_PARAM_2` with a value of `0x00210000` can be used to Replicate the first value of the current buffer across the entire buffer range count. This is useful for filling or clearing the buffer with a single value.
-`DST_PARAM_2` with a value of `0x10000000` can be used to Reverse the word order across the entire buffer range count.
-`DST_PARAM_3` with value `0x00200000` seems to enable a Sync mode. Without it DST_PARAM_2 Word-Shift has no effect.
+The following may be inaccurate, more testing is needed to confirm, clarify, or invalidate it.  
+
+#### Parameters, Sync, Reverse, FFT butterflies
++ `PARAM_0` higher 16 bits with Prefix `0x8c00` insert a stride between each word.
++ `PARAM_0` lower 16 bits appear to encode a count minus one, specifying how many words are read from the source before advancing to the next input stream segment. `PARAM_2` bit[17] needs to be set.
++ `PARAM_1` higher 16 bits with Prefix `0x8c00` or `0x8500` insert a stride between each word.
++ `PARAM_1` and `PARAM_0` using Prefix `0x8c00`can be cumulated.
++ `PARAM_2` value field (lower 16 bits) is a word offset introducing a Word-Shift that could be used as a pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.  
++ `PARAM_2` with bit[21,16] enabled, it can be used to Replicate the first value of the current buffer across the entire buffer range count. This is useful for filling or clearing the buffer with a single value.
++ `PARAM_2` with bit[28] enabled, it can be used to Reverse the word order across the entire buffer range count.
++ `PARAM_3` with bit[21] enabled, it seems to enable a Sync mode. Without it DST_PARAM_2 Word-Shift has no effect.
++ `PARAM_3` with bit[25] and using Prefix `0x8400` the last nibble seems to activate FFT-related stage/butterfly transformations.
 
 #### Internal Accumulator
 The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.  
@@ -76,8 +83,6 @@ For now we have the following observed format for the TOP and BASE descriptors: 
 In the following, what is referred to as the Back buffer is the buffer routed to the current TOP_SOURCE, over which the Front buffer will be processed. It is worth noting that the Front buffer appears to be routable to any Base or Top buffer available in the ranges `0x44000000` or `0x44020000` using the FRI related bits.
 
 #### Globals
-
-The following may be inaccurate, more testing is needed to confirm, clarify, or invalidate it.  
 
 **CROSSBAR_INPUT** maps the 8 buffers to PE inputs in the following layout:
 ```text
