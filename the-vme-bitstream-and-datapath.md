@@ -77,10 +77,24 @@ The following may be inaccurate, more testing is needed to confirm, clarify, or 
 The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.  
 
 #### Descriptors
-For now we have the following observed format for the TOP and BASE descriptors: `FRI << 28 | BRI << 24 | Opcode << 12 | unknown << 6 | k`, where FRI is the front buffer routing index, BRI is the back buffer routing index, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (for example, after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself. In any case, more tests need to be done to clarify the bits.
+For now we have the following observed format for the TOP and BASE descriptors: `F Sel << 28 | B Sel << 24 | Opcode << 12 | unknown << 6 | k`, where F Sel is the front buffer Selector, B Sel is the back buffer Selector, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (for example, after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself. In any case, more tests need to be done to clarify the bits.
+
+Bit field breakdown:
+
+| Bits      | Field                 | Notes                                                 |
+|:----------|:----------------------|:------------------------------------------------------|
+| `[31:28]` | Front Selector        | Selects the Front buffer source                       |
+| `[27:24]` | Back Selector         | Selects the Back buffer source                        |
+| `[23:20]` | Operation family      |                                                       |
+| `[19:16]` | Operation variant     |                                                       |
+| `[15:14]` | Mode?                 |                                                       |
+| `[13:8]`  | Unknown               |                                                       |
+| `[7:6]`   | Unknown               |                                                       |
+| `[5:0]`   | `k`                   | Shift amount in most cases (6 bits, range 0–63)       |
+
 
 #### Back and Front Buffers
-In the following, what is referred to as the Back buffer is the buffer routed to the current TOP_SOURCE, over which the Front buffer will be processed. It is worth noting that the Front buffer appears to be routable to any Base or Top buffer available in the ranges `0x44000000` or `0x44020000` using the FRI related bits.
+In the following, what is referred to as the Back buffer is the buffer routed to the current TOP_SOURCE, over which the Front buffer will be processed. It is worth noting that the Front buffer appears to be routable to any Base or Top buffer available in the ranges `0x44000000` or `0x44020000` using the F Sel related bits.
 
 #### Globals
 
@@ -126,7 +140,7 @@ Skews:
 
 ### Operations
 
-Using the following opcodes, the Back and Front buffers both appear to be routed to `0x44020000` by default. FRI and BRI must be modified to change the routing.
+Using the following opcodes, the Back and Front buffers both appear to be routed to `0x44020000` by default. F Sel and B Sel must be modified to change the routing.
 
 #### Generics
 
@@ -181,7 +195,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00260000` | Scalar Multiply-Shift with Bias                  | `((a * n) + b) >> k`                                                  |
 | `0x00270000` | Vector Multiply-Shift with Bias                  | `(back[n] * front[n]) + b) >> k`                                      |
 | `0x00280000` | Delayed Feedback IIR Accumulator                 | `0 if n < 2 else ((out[n-1] + front[n-2] + back[n-2]) >> k) + a`      |
-| `0x00290000` | 4-Tap Delayed FIR Convolution Filter             | `(Σ{m=0...3}(back[m] * front[n-3-m]) >> k) + a`                       |
+| `0x00290000` | Sum of Absolute Differences (SAD)                | `Σ{m=0..n-2} abs(back[m] - front[m]) + b`                             |
 | `0x002a0000` | Same as `0x00280000`?                            |                                                                       |
 | `0x002b0000` | *unknown*                                        |                                                                       |
 | `0x002c0000` | *unknown*                                        |                                                                       |
@@ -203,7 +217,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00a60000` | *unclear*                                                     | `((n * a) + b) >> k`                                             | yes       |
 | `0x00a70000` | *unclear*                                                     | `(back[n] * front[n]) + b) >> k`                                 | yes       |
 | `0x00a80000` | *unclear*                                                     | `0 if n < 2 else ((out[n-1] + front[n-2] + back[n-2]) >> k) + a` | yes       |
-| `0x00a90000` | *unclear*                                                     | `(Σ{m=0...3}(back[m] * front[n-3-m]) >> k) + a`                  | yes       |
+| `0x00a90000` | *unclear*                                                     | `Σ{m=0..n-2} abs(back[m] - front[m]) + b`                        | yes       |
 | `0x00aa0000` |  Same as `0x00a80000`?                                        |                                                                  | yes       |
 | `0x00ab0000` | *unknown*                                                     |                                                                  |           |
 | `0x00ac0000` | *unknown*                                                     |                                                                  |           |
