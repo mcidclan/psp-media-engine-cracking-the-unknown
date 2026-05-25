@@ -62,7 +62,7 @@ The composition of a Process Element is as follows:
 
 The following may be inaccurate, more testing is needed to confirm, clarify, or invalidate it.  
 
-#### Parameters, Sync, Reverse, FFT butterflies
+#### AGU Parameters, Sync, Reverse, FFT butterflies
 + `PARAM_0` higher 16 bits with Prefix `0x8c00` insert a stride between each word.
 + `PARAM_0` lower 16 bits appear to encode a count minus one, specifying how many words are read from the source before advancing to the next input stream segment. `PARAM_2` bit[17] needs to be set.
 + `PARAM_1` higher 16 bits with Prefix `0x8c00` or `0x8500` insert a stride between each word.
@@ -71,13 +71,16 @@ The following may be inaccurate, more testing is needed to confirm, clarify, or 
 + `PARAM_2` with bit[21,16] enabled, it can be used to Replicate the first value of the current buffer across the entire buffer range count. This is useful for filling or clearing the buffer with a single value.
 + `PARAM_2` with bit[28] enabled, it can be used to Reverse the word order across the entire buffer range count.
 + `PARAM_3` with bit[21] enabled, it seems to enable a Sync mode. Without it DST_PARAM_2 Word-Shift has no effect.
-+ `PARAM_3` with bit[25] and using Prefix `0x8400` the last nibble seems to activate FFT-related stage/butterfly transformations.
++ `PARAM_3` with bit[29] and using Prefix `0x8400` the last nibble seems to activate FFT-related stage/butterfly transformations (bit-reversal for example).
+
+Note on FFT bit-reversal stage:  
+`out[n] = in[ bitrev(n, [0...p-1]) ]` bitrev(n) on [0 ... p-1] bits where p is the last nibble  
 
 #### Internal Accumulator
 The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.  
 
 #### Descriptors
-For now we have the following observed format for the TOP and BASE descriptors: `F Sel << 28 | B Sel << 24 | Opcode << 12 | unknown << 6 | k`, where F Sel is the front buffer Selector, B Sel is the back buffer Selector, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (for example, after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself. In any case, more tests need to be done to clarify the bits.
+For now we have the following observed format for the TOP and BASE descriptors: `F Sel << 28 | B Sel << 24 | Opcode << 12 | Sat << 8 | unknown << 6 | k`, where F Sel is the front buffer Selector, B Sel is the back buffer Selector, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (for example, after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself. In any case, more tests need to be done to clarify the bits.
 
 Bit field breakdown:
 
@@ -87,8 +90,8 @@ Bit field breakdown:
 | `[27:24]` | Back Selector         | Selects the Back buffer source                        |
 | `[23:20]` | Operation family      |                                                       |
 | `[19:16]` | Operation variant     |                                                       |
-| `[15:14]` | Mode?                 |                                                       |
-| `[13:8]`  | Unknown               |                                                       |
+| `[15:12]` | Mode?                 |                                                       |
+| `[11:8]`  | Saturation            | Sat = (1 << (2*level - 1)) - 1                        |
 | `[7:6]`   | Unknown               |                                                       |
 | `[5:0]`   | `k`                   | Shift amount in most cases (6 bits, range 0–63)       |
 
@@ -240,7 +243,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00060000` | Conditional negation of back buffer based on front buffer mask    | `(front[n] & a) ? -back[n] : back[n]`   |
 | `0x00070000` | Shift back buffer left by k and add constant                      | `(back[n] << k) + b`                    |
 | `0x00080000` | Clamped multiply of back buffer by front buffer                   | `clamp(back[n], NEG2, POS2) * front[n]` |
-| `0x00090000` | *unclear*                                                         | ``                                      |
+| `0x00090000` | *unclear*                                                         |                                         |
 | `0x000a0000` | Shift back buffer left by front buffer value                      | `back[n] << front[n]`                   |
 | `0x000b0000` | Same as the previous one?                                         |                                         |
 | `0x000c0000` | Minimum of back and front buffer                                  | `min(back[n], front[n])`                |
@@ -248,19 +251,40 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x000e0000` | Bitwise XOR of back and front buffer                              | `back[n] ^ front[n]`                    |
 | `0x000f0000` | *Unknown*                                                         |                                         |
 
+
+| Opcode       | Operation                                                         | Expression                              |
+|:-------------|:------------------------------------------------------------------|:----------------------------------------|
+| `0x0000c000` | Constant b                                                        | `b`                                     |
+| `0x0001c000` |                                                                   | `(back[n] >> k`                         |
+| `0x0002c000` |                                                                   | `(-(back[n] >> k)) + b`                 |
+| `0x0003c000` |                                                                   | `(front[n] - back[n])`                  |
+| `0x0004c000` |                                                                   | `(-(back[n] >> b)) + a`                 |
+| `0x0005c000` |                                                                   |                                         |
+| `0x0006c000` |                                                                   |                                         |
+| `0x0007c000` |                                                                   |                                         |
+| `0x0008c000` |                                                                   |                                         |
+| `0x0009c000` |                                                                   |                                         |
+| `0x000ac000` |                                                                   |                                         |
+| `0x000bc000` |                                                                   |                                         |
+| `0x000cc000` |                                                                   |                                         |
+| `0x000dc000` |                                                                   |                                         |
+| `0x000ec000` |                                                                   |                                         |
+| `0x000fc000` |                                                                   |                                         |
+
+
 #### Runners
 
 | Opcode       | Operation                                                              | Expression                                             |
 |:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------------|
-| `0x00100000` | Running max                                                            | `out[n] = max(out[n-1], in[n])`                        |
-| `0x00110000` | running min extrema filters                                            | `out[n] = min(LASTMIN(out), back[n] - front[n])`       |
-| `0x00120000` | Running rate-limited smoothing filter <br>Peak Clamper ?               | `out[n] = min(in[n], max(in[0..n−1])); out[0] = in[0]` |
-| `0x00130000` | running max extrema filters                                            | `out[n] = max(LASTMIN(out), back[n] - front[n])`       |
+| `0x00100000` | Running max                                                            | `max(out[n-1], in[n])`                                 |
+| `0x00110000` | Running min extrema filters                                            | `min(LASTMIN(out), back[n] - front[n])`                |
+| `0x00120000` | Running rate-limited smoothing filter <br>Peak Clamper ?               | `min(in[n], max(in[0..n−1])); out[0] = in[0]`          |
+| `0x00130000` | Running max extrema filters                                            | `max(LASTMIN(out), back[n] - front[n])`                |
 
 | Opcode       | Operation                                                              | Expression                                           |
 |:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
-| `0x00140000` | *unclear*                                                              | max(back[n], front[n])                               |
-| `0x00150000` | *unknown*                                                              |                                                      |
+| `0x00140000` | Per-element maximum                                                    | `max(back[n], front[n])`                             |
+| `0x00150000` | Back buffer                                                            | `back[n]`                                            |
 | `0x00160000` | *unknown*                                                              |                                                      |
 | `0x00170000` |                                                                        | (back[n] - a)                                        |
 | `0x00180000` | *unknown*                                                              |                                                      |
@@ -315,11 +339,6 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x000d8000` |                                                                        |                                                          |
 | `0x000e8000` |                                                                        |                                                          |
 | `0x000f8000` |                                                                        |                                                          |
-
-#### 0x0000c000 to ?
-| Opcode       | Operation                                                              | Expression                                       |
-|:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------|
-| `0x0000c000` | Constant                                                               | b                                                |
 
 ### Libraries
 
