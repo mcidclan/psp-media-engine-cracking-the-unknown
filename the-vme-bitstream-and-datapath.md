@@ -273,7 +273,27 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x001f0000` |                                                                        | (front[n] - back[n]) + b                             |
 
 
-**WIP**  
+**WIP**
+
+#### 0x00090000 to 0x00f90000
+| Opcode       | Operation                                                              | Expression                                               |
+|:-------------|:-----------------------------------------------------------------------|:---------------------------------------------------------|
+| `0x00090000` | Left shift constant b by Back buffer value                             | `(b << back[n])`                                         |
+| `0x00190000` | Back buffer                                                            | `back[n]`                                                |
+| `0x00290000` | SAD                                                                    |                                                          |
+| `0x00390000` | *unknown*                                                              | `unknown`                                                |
+| `0x00490000` | Left shift constant b by Back buffer value                             | `(b << back[n])`                                         |
+| `0x00590000` | Back buffer                                                            | `back[n]`                                                |
+| `0x00690000` | SAD                                                                    |                                                          |
+| `0x00790000` | *unknown*                                                              | `unknown`                                                |
+| `0x00890000` | Left shift constant b by Front buffer value                            | `(b << front[n])`                                        |
+| `0x00990000` | Front buffer                                                           | `front[n]`                                               |
+| `0x00a90000` | SAD                                                                    |                                                          |
+| `0x00b90000` | *unknown*                                                              | `unknown`                                                |
+| `0x00c90000` | Left shift constant b by Front buffer value                            | `(b << front[n])`                                        |
+| `0x00d90000` | Front buffer                                                           | `front[n]`                                               |
+| `0x00e90000` | SAD (OR'ed with 0x00a00000)                                            |                                                          |
+| `0x00f90000` | *unknown*                                                              | `unknown`                                                |
 
 #### 0x00008000 to 0x000f8000
 
