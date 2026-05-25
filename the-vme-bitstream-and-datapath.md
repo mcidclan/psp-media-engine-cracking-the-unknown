@@ -22,7 +22,7 @@ The following is an attempt to explain how the VME pipeline works.
 - As an individual unit, the PE directly maps routes to data sources. For example, 'top' buffers are mapped to the related 'TOP' blocks of the PEs, and 'base' buffers are mapped to the 'BASE' blocks of the PEs.
 - By default, PEs run asynchronously and independently from each other. A sequential flow must be explicitly enforced through synchronization.
 - As a unit within a sequential flow, a PE inherits the last processed data from the previous stage, referred to as the back buffer, while still retaining its own TOP and BASE buffer mapping.
-- A PE can explicitly process data by applying ALU operations on its input, including arithmetic, bitwise logic, shifts and conditional operations. This behavior must be configured through the DESCRIPTOR node.
+- A PE can explicitly process data by applying operations on its input, including arithmetic, bitwise logic, shifts and conditional operations. This behavior must be configured through the DESCRIPTOR node.
 - Independently of any computation, a PE always has a structural role through its source and destination configuration, covering routing, offsets, word counts, local transformations and synchronization, among other capabilities that are not yet fully understood.
 
 
@@ -30,32 +30,32 @@ The following is an attempt to explain how the VME pipeline works.
 
 The composition of a Process Element is as follows:
 
-| Register         | Description                                                                                                                                                                                                                        | Format                                |
-|:-----------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------|
-| TOP_DESCRIPTOR   | Description of the DSP process to apply, <br>starting with the index of the secondary source used <br>to compute against the current buffer data, <br>followed by the operation opcode and the k register value                    | `(indexes << 24 \| opcode << 6 \| k)` |
-| TOP_REGISTER_A   | The 'a' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                    | `a`                                   |
-| TOP_REGISTER_B   | The 'b' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                    | `b`                                   |
-| TOP_SRC          | Routing to the 'top' source targeted by the <br>current Process Element, including the offset (in words) <br>from where to start                                                                                                   | `(routing << 16 \| offset)`           |
-| TOP_COUNT        | Number of words - 1 to read from the 'top' source                                                                                                                                                                                  | `(config << 16 \| count)`             |
-| TOP_PARAM_0      | Additional local transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                         | `(config << 16 \| value)`             |
-| TOP_PARAM_1      | Additional local transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                         | `(config << 16 \| value)`             |
-| TOP_PARAM_2      | Additional local transformations applied on the 'top' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                      | `(config << 16 \| value)`             |
-| TOP_PARAM_3      | Additional local process applied on the 'top' source: sync, <br>unknown, depends on the local config                                                                                                                               | `(config << 16 \| value)`             |
-| BASE_DESCRIPTOR  | Description of the DSP process to apply on the base source, <br>starting with the index of the secondary source used to <br>compute against the current buffer data, <br>followed by the operation opcode and the k register value | `(index << 28 \| opcode << 8 \| k)`   |
-| BASE_REGISTER_A  | The 'a' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                   | `a`                                   |
-| BASE_REGISTER_B  | The 'b' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                   | `b`                                   |
-| BASE_SRC         | Routing to the 'base' source targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                  | `(routing << 16 \| offset)`           |
-| BASE_COUNT       | Number of words - 1 to read from the 'base' source                                                                                                                                                                                 | `(config << 16 \| count)`             |
-| BASE_PARAM_0     | Additional local transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                        | `(config << 16 \| value)`             |
-| BASE_PARAM_1     | Additional local transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                        | `(config << 16 \| value)`             |
-| BASE_PARAM_2     | Additional local transformations applied on the 'base' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                     | `(config << 16 \| value)`             |
-| BASE_PARAM_3     | Additional local process applied on the 'base' source: <br>sync, unknown, depends on the local config                                                                                                                              | `(config << 16 \| value)`             |
-| DST              | Routing to the destination targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                    | `(routing << 16 \| offset)`           |
-| DST_COUNT        | Number of words - 1 to write to the destination                                                                                                                                                                                    | `(config << 16 \| count)`             |
-| DST_PARAM_0      | Additional local transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                          | `(config << 16 \| value)`             |
-| DST_PARAM_1      | Additional local transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                          | `(config << 16 \| value)`             |
-| DST_PARAM_2      | Additional local transformations applied on the destination: <br>offset shift, reverse, unknown, depends on the local config                                                                                                       | `(config << 16 \| value)`             |
-| DST_PARAM_3      | Additional local process applied on the destination: <br>sync, unknown, depends on the local config / PE end token                                                                                                                 | `(config << 16 \| value)`             |
+| Register         | Description                                                                                                                                                                                                                            | Format                                |
+|:-----------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------|
+| TOP_DESCRIPTOR   | Description of the DSP process to apply, <br>starting with the index of the secondary source used <br>to compute against the current buffer data, <br>followed by the operation opcode and the k register value                        | `(indexes << 24 \| opcode << 6 \| k)` |
+| TOP_REGISTER_A   | The 'a' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top a`                               |
+| TOP_REGISTER_B   | The 'b' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top b`                               |
+| TOP_SRC          | Routing to the 'top' source targeted by the <br>current Process Element, including the offset (in words) <br>from where to start                                                                                                       | `(routing << 16 \| offset)`           |
+| TOP_COUNT        | Number of words - 1 to read from the 'top' source                                                                                                                                                                                      | `(config << 16 \| count)`             |
+| TOP_PARAM_0      | Local AGU transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                    | `(config << 16 \| value)`             |
+| TOP_PARAM_1      | Local AGU transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                    | `(config << 16 \| value)`             |
+| TOP_PARAM_2      | Local AGU transformations applied on the 'top' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                 | `(config << 16 \| value)`             |
+| TOP_PARAM_3      | Local AGU process applied on the 'top' source: sync, <br>unknown, depends on the local config                                                                                                                                          | `(config << 16 \| value)`             |
+| BASE_DESCRIPTOR  | Description of the DSP process to apply on the base source, <br>starting with the index of the secondary source used to <br>compute against the current buffer data, <br>followed by the operation opcode and the k register value     | `(index << 28 \| opcode << 8 \| k)`   |
+| BASE_REGISTER_A  | The 'a' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base a`                              |
+| BASE_REGISTER_B  | The 'b' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base b`                              |
+| BASE_SRC         | Routing to the 'base' source targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                      | `(routing << 16 \| offset)`           |
+| BASE_COUNT       | Number of words - 1 to read from the 'base' source                                                                                                                                                                                     | `(config << 16 \| count)`             |
+| BASE_PARAM_0     | Local AGU transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                   | `(config << 16 \| value)`             |
+| BASE_PARAM_1     | Local AGU transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                   | `(config << 16 \| value)`             |
+| BASE_PARAM_2     | Local AGU transformations applied on the 'base' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                | `(config << 16 \| value)`             |
+| BASE_PARAM_3     | Local AGU process applied on the 'base' source: <br>sync, unknown, depends on the local config                                                                                                                                         | `(config << 16 \| value)`             |
+| DST              | Routing to the destination targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                        | `(routing << 16 \| offset)`           |
+| DST_COUNT        | Number of words - 1 to write to the destination                                                                                                                                                                                        | `(config << 16 \| count)`             |
+| DST_PARAM_0      | Local AGU transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                     | `(config << 16 \| value)`             |
+| DST_PARAM_1      | Local AGU transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                     | `(config << 16 \| value)`             |
+| DST_PARAM_2      | Local AGU transformations applied on the destination: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                  | `(config << 16 \| value)`             |
+| DST_PARAM_3      | Local AGU process applied on the destination: <br>sync, unknown, depends on the local config / PE end token                                                                                                                            | `(config << 16 \| value)`             |
 
 
 ### Technical Observations
@@ -145,7 +145,7 @@ Skews:
 
 Using the following opcodes, the Back and Front buffers both appear to be routed to `0x44020000` by default. F Sel and B Sel must be modified to change the routing.
 
-#### Generics
+#### Generics ALU
 
 | Opcode       | Operation                                                              | Expression                                    |
 |:-------------|:-----------------------------------------------------------------------|:----------------------------------------------|
@@ -252,27 +252,29 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x000f0000` | *Unknown*                                                         |                                         |
 
 
-| Opcode       | Operation                                                         | Expression                              |
-|:-------------|:------------------------------------------------------------------|:----------------------------------------|
-| `0x0000c000` | Constant b                                                        | `b`                                     |
-| `0x0001c000` |                                                                   | `(back[n] >> k`                         |
-| `0x0002c000` |                                                                   | `(-(back[n] >> k)) + b`                 |
-| `0x0003c000` |                                                                   | `(front[n] - back[n])`                  |
-| `0x0004c000` |                                                                   | `(-(back[n] >> b)) + a`                 |
-| `0x0005c000` |                                                                   |                                         |
-| `0x0006c000` |                                                                   |                                         |
-| `0x0007c000` |                                                                   |                                         |
-| `0x0008c000` |                                                                   |                                         |
-| `0x0009c000` |                                                                   |                                         |
-| `0x000ac000` |                                                                   |                                         |
-| `0x000bc000` |                                                                   |                                         |
-| `0x000cc000` |                                                                   |                                         |
-| `0x000dc000` |                                                                   |                                         |
-| `0x000ec000` |                                                                   |                                         |
-| `0x000fc000` |                                                                   |                                         |
+#### Data Conditioning ALU and Bitwise Opcodes
+
+| Opcode       | Operation                                                         | Expression                                  |
+|:-------------|:------------------------------------------------------------------|:--------------------------------------------|
+| `0x0000c000` | Constant b                                                        | `b`                                         |
+| `0x0001c000` | Arithmetic right shift back by k                                  | `(back[n] >> k)`                            |
+| `0x0002c000` | Negate shifted back, add constant b                               | `(-(back[n] >> k)) + b`                     |
+| `0x0003c000` | Subtract back from front                                          | `(front[n] - back[n])`                      |
+| `0x0004c000` | Negate back shifted by b, add a                                   | `(-(back[n] >> b)) + a`                     |
+| `0x0005c000` | Add front and back, shift left by k (1-2 bits)                    | `(back[n] + front[n]) << k` with `k[0..1]`  |
+| `0x0006c000` | Branchless conditional move (CMOV) with bias                      | `((front[n] & a) ? back[n] : 0) + b`        |
+| `0x0007c000` | Clamp back buffer                                                 | `max(a, min(b, back[n]))`                   |
+| `0x0008c000` | Conditional: return b if bit test on back passes, else 0          | `(back[n] & a) ? b : 0`                     |
+| `0x0009c000` | Right shift constant b by back[n] (variable barrel shift)         | `(b >> back[n])`                            |
+| `0x000ac000` | Right shift back[n] by constant b                                 | `(back[n]) >> b`                            |
+| `0x000bc000` | Same as previous one?                                             |                                             |
+| `0x000cc000` | Bitwise NAND of b and back[n]                                     | `-(b & back[n]) - 1` or `~(b & back[n])`    |
+| `0x000dc000` | Bitwise NOT of back[n] masked by ~b                               | `(-back[n] - 1) & ~b` or `(~back[n]) & ~b`  |
+| `0x000ec000` | Bitwise NOT of back[n] XOR b (selective bit flip)                 | `(~back[n]) ^ b`                            |
+| `0x000fc000` | Bitwise NOT / polarity inversion                                  | `~back[n]`                                  |
 
 
-#### Runners
+#### Running Extrema & Envelope Follower
 
 | Opcode       | Operation                                                              | Expression                                             |
 |:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------------|
@@ -297,7 +299,8 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x001f0000` |                                                                        | (front[n] - back[n]) + b                             |
 
 
-**WIP**
+  
+**WIP**  
 
 #### 0x00090000 to 0x00f90000
 | Opcode       | Operation                                                              | Expression                                               |
