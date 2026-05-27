@@ -158,7 +158,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00064000` | Conditional negation                                                   | `(x & a) != 0 ? x : NEG(x)` *(~x + 1)*        |
 | `0x00074000` | Subtract immediate and left shift                                      | `(x - b) << k`                                |
 | `0x00084000` | Negative product of back[n] and front[n] if front[n] ∈ [-2, 2], else 0 | `-(back[n] * front[n]) * 1[-2,2]​(front[n])`   |
-| `0x00094000` | *Unknown*                                                              |                                               |
+| `0x00094000` | Right shift constant b by back[n] (variable barrel shift)              | `(b >> back[n])`                              |
 | `0x000a4000` | Left shift                                                             | `(x << b)`                                    |
 | `0x000b4000` | Left shift (unclear)                                                   | `(x << b)`                                    |
 | `0x000c4000` | Bitwise AND                                                            | `(x & b)`                                     |
@@ -243,7 +243,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00060000` | Conditional negation of back buffer based on front buffer mask    | `(front[n] & a) ? -back[n] : back[n]`   |
 | `0x00070000` | Shift back buffer left by k and add constant                      | `(back[n] << k) + b`                    |
 | `0x00080000` | Clamped multiply of back buffer by front buffer                   | `clamp(back[n], NEG2, POS2) * front[n]` |
-| `0x00090000` | *unclear*                                                         |                                         |
+| `0x00090000` | Right shift constant b by back[n] (variable barrel shift)         | `(b >> back[n])`                        |
 | `0x000a0000` | Shift back buffer left by front buffer value                      | `back[n] << front[n]`                   |
 | `0x000b0000` | Same as the previous one?                                         |                                         |
 | `0x000c0000` | Minimum of back and front buffer                                  | `min(back[n], front[n])`                |
@@ -336,12 +336,13 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00078000` | Minimum of front and back buffers                                      | `min(back[n], front[n])`                                 |
 | `0x00088000` | Constant                                                               | `b`                                                      |
 | `0x00098000` | Left shift constant b by back buffer value                             | `(b << back[n])`                                         |
-| `0x000a8000` |                                                                        | `back[n] ROR.64 front[n]`  (requires new tests)          |
-| `0x000b8000` |                                                                        |                                                          |
-| `0x000c8000` |                                                                        |                                                          |
-| `0x000d8000` |                                                                        |                                                          |
-| `0x000e8000` |                                                                        |                                                          |
-| `0x000f8000` |                                                                        |                                                          |
+| `0x000a8000` | Vector Shift Right                                                     | `back[n] ROR.64 front[n]`                                |
+| `0x000b8000` | Same as previous one?                                                  | `back[n] >> front[n]`                                    |
+| `0x000c8000` | *unknown*                                                              |                                                          |
+| `0x000d8000` | *unknown*                                                              |                                                          |
+| `0x000e8000` | Inverted absolute difference                                           | `~(\|front[n]−back[n]\|)`                                |
+| `0x000f8000` | XOR parity                                                             | `back[n]0 ^ back[n]1 ^ back[n]2 ^ ...`                   |
+
 
 ### Libraries
 
