@@ -32,7 +32,7 @@ The composition of a Process Element is as follows:
 
 | Register         | Description                                                                                                                                                                                                                            | Format                                |
 |:-----------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------|
-| TOP_DESCRIPTOR   | Description of the DSP process to apply, <br>starting with the index of the secondary source used <br>to compute against the current buffer data, <br>followed by the operation opcode and the k register value                        | `(indexes << 24 \| opcode << 6 \| k)` |
+| TOP_DESCRIPTOR   | Configuration of the Top Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:8]  Sat` <br> `bit[7:6]   unknown` <br> `bit[5:0]   k` |
 | TOP_REGISTER_A   | The 'a' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top a`                               |
 | TOP_REGISTER_B   | The 'b' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top b`                               |
 | TOP_SRC          | Routing to the 'top' source targeted by the <br>current Process Element, including the offset (in words) <br>from where to start                                                                                                       | `(routing << 16 \| offset)`           |
@@ -41,7 +41,7 @@ The composition of a Process Element is as follows:
 | TOP_PARAM_1      | Local AGU transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                    | `(config << 16 \| value)`             |
 | TOP_PARAM_2      | Local AGU transformations applied on the 'top' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                 | `(config << 16 \| value)`             |
 | TOP_PARAM_3      | Local AGU process applied on the 'top' source: sync, <br>unknown, depends on the local config                                                                                                                                          | `(config << 16 \| value)`             |
-| BASE_DESCRIPTOR  | Description of the DSP process to apply on the base source, <br>starting with the index of the secondary source used to <br>compute against the current buffer data, <br>followed by the operation opcode and the k register value     | `(index << 28 \| opcode << 8 \| k)`   |
+| BASE_DESCRIPTOR  | Configuration of the Base Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:8]  Sat` <br> `bit[7:6]   unknown` <br> `bit[5:0]   k` |
 | BASE_REGISTER_A  | The 'a' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base a`                              |
 | BASE_REGISTER_B  | The 'b' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base b`                              |
 | BASE_SRC         | Routing to the 'base' source targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                      | `(routing << 16 \| offset)`           |
@@ -121,7 +121,7 @@ Each nibble encodes:
 
 *Note: this mapping appears to be used for inter-PE datapath configuration inheritance, covering routing and associated control parameters.*
 
-**CROSSBAR_FLOW** selects which PE buffer stream is routed to the input of the currently targeted PE.
+**CROSSBAR_FLOW** re-routes the wiring of the local MUX of each PE. The 32-bit field is split into two 16-bit halves, each divided into four nibbles, one per physical PE (PE0 to PE3):
 ```text
   [PE3:4] [PE2:4] [PE1:4] [PE0:4]
 ```
@@ -129,6 +129,7 @@ Each nibble encodes:
 ```text
   [PE index routing:4]
 ```
+Each nibble encodes the index of the PE whose BASE_SRC (or TOP_SRC) is routed as input to the local MUX of the targeted PE.
 
 **CROSSBAR_SKEW** selects an input and applies a cycle skew to the data stream forwarded to the target PE.
 ```text
