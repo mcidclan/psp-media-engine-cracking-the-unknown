@@ -303,7 +303,21 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
   
 **WIP**  
 
+#### 0x00001000 to 0x000f1000
+ 
+| Opcode     | FU Name                  | Operation                     | Expression                                           |
+|:-----------|:-------------------------|:------------------------------|:-----------------------------------------------------|
+| 0x00001000 |                          |                               |                                                      |
+| 0x00011000 | Vector Add               | Element-wise addition         | `back[n] + front[n]`                                 |
+| 0x00021000 | Accumulate Add           | Accumulated addition          | `back[n] + front[n]`                                 |
+| 0x00031000 | Add Immediate            | Addition with immediate       | `(back[n] + front[n]) + a`                           |
+| 0x00041000 | Shift Scale              | Arithmetic right scaling      | `(back[n] + front[n]) >> b`                          |
+| 0x00051000 | Subtract Bias            | Difference with bias removal  | `(back[n] - front[n]) - b`                           |
+| 0x00061000 | Predicate Negate         | Conditional sign inversion    | `(front[n] & a) ? -back[n] : back[n]`                |
+| 0x00071000 | Predicated Add/Sub       | Conditional add/subtract      | `(i & a) ? back[i] - b : back[i] + b`                |
+
 #### 0x00090000 to 0x00f90000
+
 | Opcode       | Operation                                                              | Expression                                               |
 |:-------------|:-----------------------------------------------------------------------|:---------------------------------------------------------|
 | `0x00090000` | Left shift constant b by Back buffer value                             | `(b << back[n])`                                         |
