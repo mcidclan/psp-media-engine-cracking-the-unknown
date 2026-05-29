@@ -195,7 +195,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00220000` | Vector Multiply-Shift                            | `(back[n] * front[n]) >> k`                                           |
 | `0x00230000` | Negated Vector Multiply-Shift                    | `-((front[n] * back[n]) >> k)`                                        |
 | `0x00240000` | Inner Product running VMAC with Bias             | `(Σn(back[n] * front[n]) + b) >> k`                                   |
-| `0x00250000` | Temporal MAC with Bias Shift                     | `((y[n-1] + x[n]) + b) >> k`                                          |
+| `0x00250000` | Accumulate with Shift and Bias                   | `(i == 0 ? (b >> K) : out[n-1]) + (back[n] >> k)`                     |
 | `0x00260000` | Scalar Multiply-Shift with Bias                  | `((a * n) + b) >> k`                                                  |
 | `0x00270000` | Vector Multiply-Shift with Bias                  | `(back[n] * front[n]) + b) >> k`                                      |
 | `0x00280000` | Delayed Feedback IIR Accumulator                 | `0 if n < 2 else ((out[n-1] + front[n-2] + back[n-2]) >> k) + a`      |
@@ -302,6 +302,26 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 
   
 **WIP**  
+
+| Opcode       | Operation                                                              | Expression                                           |
+|:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
+| `0x00050000` | Subtract front buffer right shifted by b from back buffer              | `back[n] - (front[n] >> b)`                          |
+| `0x00150000` | Back buffer                                                            | `back[n]`                                            |
+| `0x00250000` | Accumulate with Shift and Bias                                         | `(i == 0 ? (b >> K) : out[n-1]) + (back[n] >> k)`    |
+| `0x00350000` | *unknown*                                                              | *unknown*                                            |
+| `0x00450000` | Subtract and right shift                                               | `(back[n] - front[n]) >> b`                          |
+| `0x00550000` | Back buffer                                                            | `back[n]`                                            |
+| `0x00650000` |                                                                        |                                                      |
+| `0x00750000` |                                                                        |                                                      |
+| `0x00850000` |                                                                        |                                                      |
+| `0x00950000` |                                                                        |                                                      |
+| `0x00a50000` |                                                                        |                                                      |
+| `0x00b50000` |                                                                        |                                                      |
+| `0x00c50000` |                                                                        |                                                      |
+| `0x00d50000` |                                                                        |                                                      |
+| `0x00e50000` |                                                                        |                                                      |
+| `0x00f50000` |                                                                        |                                                      |
+
 
 #### 0x00001000 to 0x000f1000
  
