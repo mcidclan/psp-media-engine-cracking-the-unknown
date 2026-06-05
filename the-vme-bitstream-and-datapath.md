@@ -286,18 +286,17 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | Opcode       | Operation                                                              | Expression                                           |
 |:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
 | `0x00140000` | Per-element maximum                                                    | `max(back[n], front[n])`                             |
-| `0x00150000` | Back buffer                                                            | `back[n]`                                            |
-| `0x00160000` | *unknown*                                                              |                                                      |
-| `0x00170000` |                                                                        | (back[n] - a)                                        |
-| `0x00180000` | *unknown*                                                              |                                                      |
-| `0x00190000` | *unknown*                                                              |                                                      |
-| `0x001a0000` | *unknown*                                                              |                                                      |
-| `0x001b0000` | Constant                                                               | b                                                    |
-| `0x001c0000` | Add back buffer to front buffer                                        | (back[n] + front[n])                                 |
-| `0x001d0000` | *unknown*                                                              |                                                      |
-| `0x001e0000` |                                                                        | (back[n] - front[n]) + a                             |
-| `0x001f0000` |                                                                        | (front[n] - back[n]) + b                             |
-
+| `0x00150000` | Back buffer *unclear*                                                  | `back[n]`                                            |
+| `0x00160000` | Same as previous one?                                                  |                                                      |
+| `0x00170000` | Signed 24-bit absolute difference                                      | `\|back[n]-b\|`                                      |
+| `0x00180000` | Back buffer *unclear*                                                  | `back[n]`                                            |
+| `0x00190000` | Same as previous one?                                                  |                                                      |
+| `0x001a0000` | Same as previous one?                                                  |                                                      |
+| `0x001b0000` | Constant                                                               | `b`                                                  |
+| `0x001c0000` | Signed 24-bit absolute sum                                             | `\|(back[n] + front[n])\|`                           |
+| `0x001d0000` | Back buffer *unclear*                                                  | `back[n]`                                            |
+| `0x001e0000` | Signed 24-bit absolute difference with offset a                        | `\|(back[n] - front[n])\| + a`                       |
+| `0x001f0000` |                                                                        | `\|(front[n] - back[n])\| + b`                       |
 
   
 **WIP**  
@@ -418,7 +417,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x000b8000` | Same as previous one?                                                  | `back[n] >> front[n]`                                    |
 | `0x000c8000` | *unknown*                                                              |                                                          |
 | `0x000d8000` | *unknown*                                                              |                                                          |
-| `0x000e8000` | Inverted absolute difference                                           | `~(\|front[n]−back[n]\|)`                                |
+| `0x000e8000` | Inverted absolute difference                                           | `~(\|front[n]-back[n]\|)`                                |
 | `0x000f8000` | XOR parity                                                             | `back[n]0 ^ back[n]1 ^ back[n]2 ^ ...`                   |
 
 
