@@ -8,10 +8,9 @@ The architecture operates on 24-bit two's complement data, therefore supporting 
 
 The inter-buffer operations (front[n], back[n]) indicate a streamed vector processing capability where complete data blocks can be staged and transformed within the pipeline with very little software overhead. The local SRAM hosting the 8 KB internal buffers could serve as a vertex cache, scanline buffer, audio sample store, or even a physics scratchpad.
 
-The following is an attempt to explain how the VME pipeline works.
+The following is an attempt to explain how the VME pipeline works.  
 
-
-*Note: All of the following observations were made on real PSP Slim hardware.*
+*Note: All of the following are based on personal observations and empirical findings made on PSP Slim hardware running Pro-C.*
 
 ### Pipeline
 
@@ -167,7 +166,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x000e4000` | Exclusive OR                                                           | `(x ^ b)`                                     |
 | `0x000f4000` | Non-zero test                                                          | `(x != 0)`                                    |
 
-#### Multiply / MACs / Filters
+#### Multiply / MACs / Filters using the ACC
 
 | Opcode       | Operation                                        | Expression                                    |
 |:-------------|:-------------------------------------------------|:----------------------------------------------|
@@ -303,18 +302,62 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
   
 **WIP**  
 
+#### 0x00050000 to 0x0005f000
+
+| Opcode       | Operation                                                          | Expression                                                   |
+|:-------------|:-------------------------------------------------------------------|:-------------------------------------------------------------|
+| `0x00050000` | Subtract front buffer right shifted by b from back buffer          | `back[n] - (front[n] >> b)`                                  |
+| `0x00051000` | Same as previous one?                                              |                                                              |
+| `0x00052000` | Same as previous one?                                              |                                                              |
+| `0x00053000` | Same as previous one?                                              |                                                              |
+| `0x00054000` | Shift and subtract                                                 | `(back[n] >> b) - a`                                         |
+| `0x00055000` | Same as previous one?                                              |                                                              |
+| `0x00056000` | Same as previous one?                                              |                                                              |
+| `0x00057000` | Same as previous one?                                              |                                                              |
+| `0x00058000` | Add second 8-bit channel components <br>and scale result           | `(((0xFF00 & front[n]) + (0xFF00 & back[n])) >> 8) << k`     |
+| `0x00059000` | Same as previous one?                                              |                                                              |
+| `0x0005a000` | Same as previous one?                                              |                                                              |
+| `0x0005b000` | Same as previous one?                                              |                                                              |
+| `0x0005c000` | Add front and back, shift left by k (1-2 bits)                     | `((0xFF & back[n]) + (0xFF & front[n])) << k` with `k[0..1]` |
+| `0x0005d000` | Same as previous one?                                              |                                                              |
+| `0x0005e000` | Same as previous one?                                              |                                                              |
+| `0x0005f000` | Same as previous one?                                              |                                                              |
+
+#### 0x00080000 to 0x0008f000
+
+| Opcode       | Operation                                                              | Expression                                           |
+|:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
+| `0x00080000` | Multiply back and front buffers if front[n] ∈ [-2, 2], else 0          | `(back[n] * front[n]) * 1[-2,2]​(front[n])`           |
+| `0x00081000` | Same as previous one?                                                  |                                                      |
+| `0x00082000` | Same as previous one?                                                  |                                                      |
+| `0x00083000` | Same as previous one? *last bits unknown*                              |                                                      |
+| `0x00084000` | Negative product of back[n] and front[n] if front[n] ∈ [-2, 2], else 0 | `-(back[n] * front[n]) * 1[-2,2]​(front[n])`          |
+| `0x00085000` | Same as previous one?                                                  |                                                      |
+| `0x00086000` | Same as previous one?                                                  |                                                      |
+| `0x00087000` | Same as previous one?                                                  |                                                      |
+| `0x00088000` | Constant                                                               | `b`                                                  |
+| `0x00089000` | Same as previous one?                                                  |                                                      |
+| `0x0008a000` | Same as previous one?                                                  |                                                      |
+| `0x0008b000` | Same as previous one?                                                  |                                                      |
+| `0x0008c000` | Conditional: return b if bit test on back passes, else 0               | `(back[n] & a) ? b : 0`                              |
+| `0x0008d000` | Same as previous one?                                                  |                                                      |
+| `0x0008e000` | Same as previous one?                                                  |                                                      |
+| `0x0008f000` | Same as previous one?                                                  |                                                      |
+
+#### 0x00050000 to 0x00f50000
+
 | Opcode       | Operation                                                              | Expression                                           |
 |:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
 | `0x00050000` | Subtract front buffer right shifted by b from back buffer              | `back[n] - (front[n] >> b)`                          |
 | `0x00150000` | Back buffer                                                            | `back[n]`                                            |
-| `0x00250000` | Accumulate with Shift and Bias                                         | `(i == 0 ? (b >> K) : out[n-1]) + (back[n] >> k)`    |
+| `0x00250000` | Accumulate with Shift and Bias                                         | `(i == 0 ? (b >> k) : out[n-1]) + (back[n] >> k)`    |
 | `0x00350000` | *unknown*                                                              | *unknown*                                            |
 | `0x00450000` | Subtract and right shift                                               | `(back[n] - front[n]) >> b`                          |
 | `0x00550000` | Back buffer                                                            | `back[n]`                                            |
-| `0x00650000` |                                                                        |                                                      |
-| `0x00750000` |                                                                        |                                                      |
-| `0x00850000` |                                                                        |                                                      |
-| `0x00950000` |                                                                        |                                                      |
+| `0x00650000` |                                                                        | `(out[n-1] + back[n] + b) >> k`                      |
+| `0x00750000` | *unknown*                                                              |                                                      |
+| `0x00850000` |                                                                        | `-front[n]`                                          |
+| `0x00950000` | *unknown*                                                              |                                                      |
 | `0x00a50000` |                                                                        |                                                      |
 | `0x00b50000` |                                                                        |                                                      |
 | `0x00c50000` |                                                                        |                                                      |
@@ -325,16 +368,16 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 
 #### 0x00001000 to 0x000f1000
  
-| Opcode     | FU Name                  | Operation                     | Expression                                           |
-|:-----------|:-------------------------|:------------------------------|:-----------------------------------------------------|
-| 0x00001000 |                          |                               |                                                      |
-| 0x00011000 | Vector Add               | Element-wise addition         | `back[n] + front[n]`                                 |
-| 0x00021000 | Accumulate Add           | Accumulated addition          | `back[n] + front[n]`                                 |
-| 0x00031000 | Add Immediate            | Addition with immediate       | `(back[n] + front[n]) + a`                           |
-| 0x00041000 | Shift Scale              | Arithmetic right scaling      | `(back[n] + front[n]) >> b`                          |
-| 0x00051000 | Subtract Bias            | Difference with bias removal  | `(back[n] - front[n]) - b`                           |
-| 0x00061000 | Predicate Negate         | Conditional sign inversion    | `(front[n] & a) ? -back[n] : back[n]`                |
-| 0x00071000 | Predicated Add/Sub       | Conditional add/subtract      | `(i & a) ? back[i] - b : back[i] + b`                |
+| Opcode       | FU Name                  | Operation                     | Expression                                           |
+|:-------------|:-------------------------|:------------------------------|:-----------------------------------------------------|
+| `0x00001000` |                          |                               |                                                      |
+| `0x00011000` | Vector Add               | Element-wise addition         | `back[n] + front[n]`                                 |
+| `0x00021000` | Accumulate Add           | Accumulated addition          | `back[n] + front[n]`                                 |
+| `0x00031000` | Add Immediate            | Addition with immediate       | `(back[n] + front[n]) + a`                           |
+| `0x00041000` | Shift Scale              | Arithmetic right scaling      | `(back[n] + front[n]) >> b`                          |
+| `0x00051000` | Subtract Bias            | Difference with bias removal  | `(back[n] - front[n]) - b`                           |
+| `0x00061000` | Predicate Negate         | Conditional sign inversion    | `(front[n] & a) ? -back[n] : back[n]`                |
+| `0x00071000` | Predicated Add/Sub       | Conditional add/subtract      | `(i & a) ? back[i] - b : back[i] + b`                |
 
 #### 0x00090000 to 0x00f90000
 
