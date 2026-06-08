@@ -109,6 +109,8 @@ Each byte encodes:
   [front index routing:4 | back index routing:4]
 ```
 
+*Note:can be using with `BASE_INPUT`/`ENABLE_SECOND_FU` as a router*
+ 
 **CROSSBAR_ARCH** maps inter-PE datapath configuration inheritance. Each nibble selects the source PE index for a target PE lane:
 ```text
   [PE3:4] [PE2:4] [PE1:4] [PE0:4]
@@ -420,6 +422,27 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x000e8000` | Inverted absolute difference                                           | `~(\|front[n]-back[n]\|)`                                |
 | `0x000f8000` | XOR parity                                                             | `back[n]0 ^ back[n]1 ^ back[n]2 ^ ...`                   |
 
+
+#### 0x00010000 to 0x00f10000
+
+| Opcode       | Operation                                                     | Expression                                                       |
+|:-------------|:--------------------------------------------------------------|:-----------------------------------------------------------------|
+| `0x00010000` | Add back buffer to front buffer and right shift               | `(back[n] + front[n]) >> k`                                      |
+| `0x00110000` | Running min extrema filters                                   | `min(LASTMIN(out), back[n] - front[n])`                          |
+| `0x00210000` | Delayed Scalar Multiply-Shift                                 | `(x[n] * x[n-1]) >> k` with `x[-1] = b`                          |
+| `0x00310000` |                                                               |                                                                  |
+| `0x00410000` |                                                               |                                                                  |
+| `0x00510000` |                                                               |                                                                  |
+| `0x00610000` |                                                               |                                                                  |
+| `0x00710000` |                                                               |                                                                  |
+| `0x00810000` |                                                               |                                                                  |
+| `0x00910000` |                                                               |                                                                  |
+| `0x00a10000` | *unclear*                                                     | `front[n] * front[n-1] + ((!(n % 4) && n) ? front[n-1] / 3 : 0)` |
+| `0x00b10000` |                                                               |                                                                  |
+| `0x00c10000` |                                                               |                                                                  |
+| `0x00d10000` |                                                               |                                                                  |
+| `0x00e10000` |                                                               |                                                                  |
+| `0x00f10000` |                                                               |                                                                  |
 
 ### Libraries
 
