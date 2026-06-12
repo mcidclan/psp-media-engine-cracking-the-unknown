@@ -430,10 +430,10 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00010000` | Add back buffer to front buffer and right shift               | `(back[n] + front[n]) >> k`                                      |
 | `0x00110000` | Running min extrema filters                                   | `min(LASTMIN(out), back[n] - front[n])`                          |
 | `0x00210000` | Delayed Scalar Multiply-Shift                                 | `(x[n] * x[n-1]) >> k` with `x[-1] = b`                          |
-| `0x00310000` |                                                               |                                                                  |
-| `0x00410000` |                                                               |                                                                  |
-| `0x00510000` |                                                               |                                                                  |
-| `0x00610000` |                                                               |                                                                  |
+| `0x00310000` |                                                               | `(back[n] + front[n]) >> k`                                      |
+| `0x00410000` |                                                               | `(back[n] + front[n]) >> k`                                      |
+| `0x00510000` |                                                               | `(front[n] - back[n]) >> k`                                      |
+| `0x00610000` |                                                               | `back[i] * back[i-1]` with `back[-1] = b`                        |
 | `0x00710000` |                                                               |                                                                  |
 | `0x00810000` |                                                               |                                                                  |
 | `0x00910000` |                                                               |                                                                  |
@@ -443,6 +443,21 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00d10000` |                                                               |                                                                  |
 | `0x00e10000` |                                                               |                                                                  |
 | `0x00f10000` |                                                               |                                                                  |
+
+
+### MIXER Observations
+
+### MIXER A
+0x00001040 -x
+0x00000080 to 0x...f0 shift 1 cycle
+0x20000040 shift 1 cycle right
+0x80000040 clear
+0x00010040 add 1
+0x00020040 bits right shift
+0x00030040 bits right shift (min 1)
+
+### MIXER B
+0x00000004 shift 3 cycles right
 
 ### Libraries
 
