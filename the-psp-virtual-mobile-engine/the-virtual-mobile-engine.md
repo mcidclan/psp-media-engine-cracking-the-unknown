@@ -168,7 +168,7 @@ Please keep in mind that the information provided here is a work in progress and
 
 ## VME, DSP Documentation
 
-For more technical information, please see the [Vme Bitstream/Context and DataPath](the-vme-bitstream-and-datapath.md) documentation
+For more technical information, please see the [Vme Bitstream/Context Memory and DataPath](the-vme-bitstream-and-datapath.md) documentation
 
 ## Required Libraries and Related Work
 
