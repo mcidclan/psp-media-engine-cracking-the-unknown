@@ -34,32 +34,32 @@ The following is an attempt to explain how the VME pipeline works.
 
 The composition of a Process Element is as follows:
 
-| Register         | Description                                                                                                                                                                                                                            | Format                      |
-|:-----------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------|
-| TOP_DESCRIPTOR   | Configuration of the Top Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:8]  Sat` <br> `bit[7:6]   unknown` <br> `bit[5:0]   k` |
-| TOP_REGISTER_A   | The 'a' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top a`                     |
-| TOP_REGISTER_B   | The 'b' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top b`                     |
-| TOP_SRC          | Routing to the 'top' source targeted by the <br>current Process Element, including the offset (in words) <br>from where to start                                                                                                       | `(routing << 16 \| offset)` |
-| TOP_COUNT        | Step, Number of words - Step to read from the 'top' source                                                                                                                                                                             | `(step << 16 \| count)`     |
-| TOP_PARAM_0      | Local AGU transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                    | `(config << 16 \| value)`   |
-| TOP_PARAM_1      | Local AGU transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                    | `(config << 16 \| value)`   |
-| TOP_PARAM_2      | Local AGU transformations applied on the 'top' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                 | `(config << 16 \| value)`   |
-| TOP_PARAM_3      | Local AGU process applied on the 'top' source: sync, <br>unknown, depends on the local config                                                                                                                                          | `(config << 16 \| value)`   |
-| BASE_DESCRIPTOR  | Configuration of the Base Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:8]  Sat` <br> `bit[7:6]   unknown` <br> `bit[5:0]   k` |
-| BASE_REGISTER_A  | The 'a' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base a`                    |
-| BASE_REGISTER_B  | The 'b' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base b`                    |
-| BASE_SRC         | Routing to the 'base' source targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                      | `(routing << 16 \| offset)` |
-| BASE_COUNT       | Step, Number of words - Step to read from the 'base' source                                                                                                                                                                            | `(step << 16 \| count)`     |
-| BASE_PARAM_0     | Local AGU transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                   | `(config << 16 \| value)`   |
-| BASE_PARAM_1     | Local AGU transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                   | `(config << 16 \| value)`   |
-| BASE_PARAM_2     | Local AGU transformations applied on the 'base' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                | `(config << 16 \| value)`   |
-| BASE_PARAM_3     | Local AGU process applied on the 'base' source: <br>sync, unknown, depends on the local config                                                                                                                                         | `(config << 16 \| value)`   |
-| DST              | Routing to the destination targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                        | `(routing << 16 \| offset)` |
-| DST_COUNT        | Step, Number of words - Step to write to the destination                                                                                                                                                                               | `(step << 16 \| count)`     |
-| DST_PARAM_0      | Local AGU transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                     | `(config << 16 \| value)`   |
-| DST_PARAM_1      | Local AGU transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                     | `(config << 16 \| value)`   |
-| DST_PARAM_2      | Local AGU transformations applied on the destination: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                  | `(config << 16 \| value)`   |
-| DST_PARAM_3      | Local AGU process applied on the destination: <br>sync, unknown, depends on the local config / PE end token                                                                                                                            | `(config << 16 \| value)`   |
+| Register                  | Description                                                                                                                                                                                                                            | Format                      |
+|:--------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------|
+| FUNCTIONAL_UNIT_PRIMARY   | Configuration of the Top Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:8]  Sat` <br> `bit[7:6]   unknown` <br> `bit[5:0]   k` |
+| FU_PRIMARY_REGISTER_A     | The 'a' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top a`                     |
+| FU_PRIMARY_REGISTER_B     | The 'b' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top b`                     |
+| TOP_MODE                  | Routing to the 'top' source targeted by the <br>current Process Element, including the offset (in words) <br>from where to start                                                                                                       | `(routing << 16 \| offset)` |
+| TOP_COUNT                 | Step, Number of words - Step to read from the 'top' source                                                                                                                                                                             | `(step << 16 \| count)`     |
+| TOP_INNER_0               | Local AGU transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                    | `(config << 16 \| value)`   |
+| TOP_INNER_1               | Local AGU transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                    | `(config << 16 \| value)`   |
+| TOP_FORMAT_0              | Local AGU transformations applied on the 'top' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                 | `(config << 16 \| value)`   |
+| TOP_FORMAT_1              | Local AGU process applied on the 'top' source: sync, <br>unknown, depends on the local config                                                                                                                                          | `(config << 16 \| value)`   |
+| FUNCTIONAL_UNIT_SECONDARY | Configuration of the Base Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:8]  Sat` <br> `bit[7:6]   unknown` <br> `bit[5:0]   k` |
+| FU_SECONDARY_REGISTER_A   | The 'a' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base a`                    |
+| FU_SECONDARY_REGISTER_B   | The 'b' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base b`                    |
+| BASE_MODE                 | Routing to the 'base' source targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                      | `(routing << 16 \| offset)` |
+| BASE_COUNT                | Step, Number of words - Step to read from the 'base' source                                                                                                                                                                            | `(step << 16 \| count)`     |
+| BASE_INNER_0              | Local AGU transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                   | `(config << 16 \| value)`   |
+| BASE_INNER_1              | Local AGU transformations applied on the 'base' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                   | `(config << 16 \| value)`   |
+| BASE_FORMAT_0             | Local AGU transformations applied on the 'base' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                | `(config << 16 \| value)`   |
+| BASE_FORMAT_1             | Local AGU process applied on the 'base' source: <br>sync, unknown, depends on the local config                                                                                                                                         | `(config << 16 \| value)`   |
+| WRITE                     | Routing to the destination targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                        | `(routing << 16 \| offset)` |
+| WRITE_COUNT               | Step, Number of words - Step to write to the destination                                                                                                                                                                               | `(step << 16 \| count)`     |
+| WRITE_INNER_0             | Local AGU transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                     | `(config << 16 \| value)`   |
+| WRITE_INNER_1             | Local AGU transformations applied on the destination: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                     | `(config << 16 \| value)`   |
+| WRITE_FORMAT_0            | Local AGU transformations applied on the destination: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                  | `(config << 16 \| value)`   |
+| WRITE_FORMAT_1            | Local AGU process applied on the destination: <br>sync, unknown, depends on the local config / PE end token                                                                                                                            | `(config << 16 \| value)`   |
 
 
 ### Technical Observations
@@ -67,15 +67,15 @@ The composition of a Process Element is as follows:
 The following may be inaccurate, more testing is needed to confirm, clarify, or invalidate it.  
 
 #### AGU Parameters, Sync, Reverse, FFT butterflies
-+ `PARAM_0` higher 16 bits with Prefix `0x8c00` insert a step between each word.
-+ `PARAM_0` lower 16 bits appear to encode a count minus one, specifying how many words are read from the source before advancing to the next input stream segment. `PARAM_2` bit[17] needs to be set.
-+ `PARAM_1` higher 16 bits with Prefix `0x8c00` or `0x8500` insert a step between each word.
-+ `PARAM_1` and `PARAM_0` using Prefix `0x8c00`can be cumulated.
-+ `PARAM_2` value field (lower 16 bits) is a word offset introducing a Word-Shift that could be used as a pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.  
-+ `PARAM_2` with bit[21,16] enabled, it can be used to Replicate the first value of the current buffer across the entire buffer range count. This is useful for filling or clearing the buffer with a single value.
-+ `PARAM_2` with bit[28] enabled, it can be used to Reverse the word order across the entire buffer range count.
-+ `PARAM_3` with bit[21] enabled, it seems to enable a Sync mode. Without it DST_PARAM_2 Word-Shift has no effect.
-+ `PARAM_3` with bit[29] and using Prefix `0x8400` the last nibble seems to activate FFT-related stage/butterfly transformations (bit-reversal for example).
++ `INNER_0` higher 16 bits with Prefix `0x8c00` insert a step between each word.
++ `INNER_0` lower 16 bits appear to encode a count minus one, specifying how many words are read from the source before advancing to the next input stream segment. `PARAM_2` bit[17] needs to be set.
++ `INNER_1` higher 16 bits with Prefix `0x8c00` or `0x8500` insert a step between each word.
++ `INNER_1` and `PARAM_0` using Prefix `0x8c00`can be cumulated.
++ `FORMAT_0` value field (lower 16 bits) is a word offset introducing a Word-Shift that could be used as a pipeline drain. Below 0x0a sync seems to not fire correctly, 0x0a and above work. This minimum value suggests a pipeline depth of ~10 stages. Higher values work but waste words.  
++ `FORMAT_0` with bit[21,16] enabled, it can be used to Replicate the first value of the current buffer across the entire buffer range count. This is useful for filling or clearing the buffer with a single value.
++ `FORMAT_0` with bit[28] enabled, it can be used to Reverse the word order across the entire buffer range count.
++ `FORMAT_1` with bit[21] enabled, it seems to enable a Sync mode. Without it DST_PARAM_2 Word-Shift has no effect.
++ `FORMAT_1` with bit[29] and using Prefix `0x8400` the last nibble seems to activate FFT-related stage/butterfly transformations (bit-reversal for example).
 
 Note on FFT bit-reversal stage:  
 `out[n] = in[ bitrev(n, [0...p-1]) ]` bitrev(n) on [0 ... p-1] bits where p is the last nibble  
@@ -105,7 +105,7 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 
 #### Globals
 
-**CROSSBAR_INPUT** maps the 8 buffers to PE inputs in the following layout:
+**INTERCONNECT_INPUT** maps the 8 buffers to PE inputs in the following layout:
 ```text
   [PE3:8] [PE2:8] [PE1:8] [PE0:8]
 ```
@@ -116,7 +116,7 @@ Each byte encodes:
 
 *Note:can be using with `BASE_INPUT`/`ENABLE_SECOND_FU` as a router*
  
-**CROSSBAR_ARCH** maps inter-PE datapath configuration inheritance. Each nibble selects the source PE index for a target PE lane:
+**INTERCONNECT_ARCH** maps inter-PE datapath configuration inheritance. Each nibble selects the source PE index for a target PE lane:
 ```text
   [PE3:4] [PE2:4] [PE1:4] [PE0:4]
 ```
@@ -127,7 +127,7 @@ Each nibble encodes:
 
 *Note: this mapping appears to be used for inter-PE datapath configuration inheritance, covering routing and associated control parameters.*
 
-**CROSSBAR_FLOW** re-routes the wiring of the local MUX of each PE. The 32-bit field is split into two 16-bit halves, each divided into four nibbles, one per physical PE (PE0 to PE3):
+**INTERCONNECT_FLOW** re-routes the wiring of the local MUX of each PE. The 32-bit field is split into two 16-bit halves, each divided into four nibbles, one per physical PE (PE0 to PE3):
 ```text
   [PE3:4] [PE2:4] [PE1:4] [PE0:4]
 ```
@@ -137,7 +137,7 @@ Each nibble encodes:
 ```
 Each nibble encodes the index of the PE whose BASE_SRC (or TOP_SRC) is routed as input to the local MUX of the targeted PE.
 
-**CROSSBAR_SKEW** selects an input and applies a cycle skew to the data stream forwarded to the target PE.
+**INTERCONNECT_SKEW** selects an input and applies a cycle skew to the data stream forwarded to the target PE.
 ```text
   top[31:16]{[PE3:4] [PE2:4] [PE1:4] [PE0:4]} base[15:0]{[PE3:4] [PE2:4] [PE1:4] [PE0:4]}
 ```
@@ -455,14 +455,14 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 ### MIXER A
 0x00001040 -x
 0x00000080 to 0x...f0 shift 1 cycle
-0x20000040 shift 1 cycle right?
+0x20000040 shift right fu flow cycles?
 0x80000040 clear
 0x00010040 add 1
 0x00020040 bits right shift
 0x00030040 bits right shift (min 1)
 
-### MIXER B
-0x00000004 shift 3 cycles right
+### MIXER_C
+0x00000004 right shift 3 cycles
 
 ### Libraries
 
