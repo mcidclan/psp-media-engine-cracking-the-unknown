@@ -450,19 +450,19 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00f10000` |                                                               |                                                                  |
 
 
-### MIXER Observations
+### MODIFIER Observations
 
-### MIXER A
-0x00001040 -x
-0x00000080 to 0x...f0 shift 1 cycle
-0x20000040 shift right fu flow cycles?
-0x80000040 clear
-0x00010040 add 1
-0x00020040 bits right shift
-0x00030040 bits right shift (min 1)
+#### MODIFIER_A
+0x00001040 -x  
+0x00000080 to 0x...f0 shift 1 cycle  
+0x20000040 shift right fu flow cycles?  
+0x80000040 clear  
+0x00010040 add 1  
+0x00020040 bits right shift  
+0x00030040 bits right shift (min 1)  
 
-### MIXER_C
-0x00000004 right shift 3 cycles
+#### MODIFIER_C
+0x00000004 right shift 3 cycles  
 
 ### Libraries
 
