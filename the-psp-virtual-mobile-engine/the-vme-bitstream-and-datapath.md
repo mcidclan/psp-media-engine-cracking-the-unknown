@@ -105,7 +105,7 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 
 #### Globals
 
-**INTERCONNECT_INPUT** maps the 8 buffers to PE inputs in the following layout:
+**INTERCONNECT_AGU_TOP** (renamed from INPUT) maps the 8 buffers to PE inputs in the following layout:
 ```text
   [PE3:8] [PE2:8] [PE1:8] [PE0:8]
 ```
@@ -116,7 +116,7 @@ Each byte encodes:
 
 *Note:can be using with `BASE_INPUT`/`ENABLE_SECOND_FU` as a router*
  
-**INTERCONNECT_ARCH** maps inter-PE datapath configuration inheritance. Each nibble selects the source PE index for a target PE lane:
+**INTERCONNECT_AGU_WRITE** (renamed from ARCH) maps inter-PE datapath configuration inheritance. Each nibble selects the source PE index for a target PE lane:
 ```text
   [PE3:4] [PE2:4] [PE1:4] [PE0:4]
 ```
@@ -127,7 +127,7 @@ Each nibble encodes:
 
 *Note: this mapping appears to be used for inter-PE datapath configuration inheritance, covering routing and associated control parameters.*
 
-**INTERCONNECT_FLOW** re-routes the wiring of the local MUX of each PE. The 32-bit field is split into two 16-bit halves, each divided into four nibbles, one per physical PE (PE0 to PE3):
+**INTERCONNECT_AGU_BASE** (renamed from FLOW) re-routes the wiring of the local MUX of each PE. The 32-bit field is split into two 16-bit halves, each divided into four nibbles, one per physical PE (PE0 to PE3):
 ```text
   [PE3:4] [PE2:4] [PE1:4] [PE0:4]
 ```
