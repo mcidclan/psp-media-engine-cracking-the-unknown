@@ -21,6 +21,10 @@ The components of interest in this experimental investigation are primarily the 
 
 - [Syscall Table: Slim+ (t2img.img)](media-engine-t2img.syscall-table.txt)
 
+## Other Observations
+
+- [Primary DMAC/ Main VME DMAC](0x440ff000.md)
+
 ## Testing Context
 
 The tests have been conducted on a PSP Slim running CFW 6.61 Pro-C. Iterations were performed through PSPLINK in order to reduce time consumption and simplify the testing process. However, note that when using PSPLINK, some initial states could differ from a normal eboot launch, for example when testing the VME bitstream.  
