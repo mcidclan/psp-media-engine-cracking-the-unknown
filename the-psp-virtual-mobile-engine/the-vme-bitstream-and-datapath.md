@@ -95,9 +95,20 @@ Bit field breakdown:
 | `[23:20]` | Operation family      |                                                       |
 | `[19:16]` | Operation variant     |                                                       |
 | `[15:12]` | Mode?                 |                                                       |
-| `[11:8]`  | Saturation            | Sat = (1 << (2*level - 1)) - 1                        |
-| `[7:6]`   | Unknown               |                                                       |
+| `[11:6]`  | Saturation            | See the saturator note below                          |
 | `[5:0]`   | `k`                   | Shift amount in most cases (6 bits, range 0–63)       |
+
+
+**Note on the FU Saturator Field `[11:6]`**
+
+| Bit    | Min         | Max        |
+|:-------|:------------|:-----------|
+| `[6]`  |             |            |
+| `[7]`  | -1          | 0          |
+| `[8]`  | -2          | 1          |
+| `[9]`  | -8          | 7          |
+| `[10]` | -128        | 127        |
+| `[11]` | -32768      | 32767      |
 
 
 #### Back and Front Buffers
