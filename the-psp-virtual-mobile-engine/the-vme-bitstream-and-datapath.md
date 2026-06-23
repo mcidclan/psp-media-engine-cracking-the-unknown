@@ -316,7 +316,29 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x001e0000` | Signed 24-bit absolute difference with offset a                        | `\|(back[n] - front[n])\| + a`                       |
 | `0x001f0000` |                                                                        | `\|(front[n] - back[n])\| + b`                       |
 
-  
+
+#### Some Pixel ALU Operations: bitwise logic, arithmetic, shift and predicated select
+
+| Opcode       | Operation                                                              | Expression                                               |
+|:-------------|:-----------------------------------------------------------------------|:---------------------------------------------------------|
+| `0x00008000` | Passthrough                                                            | `back[n]`                                                |
+| `0x00018000` | Subtract back buffer from front buffer and right shift                 | `(front[n] - back[n]) >> k`                              |
+| `0x00028000` | Same as previous one?                                                  |                                                          |
+| `0x00038000` | Accumulate front and back buffers                                      | `(front[n] + back[n])`                                   |
+| `0x00048000` | Subtract back buffer from front buffer and add constant b              | `(front[n] - back[n]) + b`                               |
+| `0x00058000` | Add second 8-bit channel components <br>and scale result               | `(((0xFF00 & front[n]) + (0xFF00 & back[n])) >> 8) << k` |
+| `0x00068000` | predicated select PHIMUX                                               | `(front[n] & a) != 0 ? b : back[n]`                      |
+| `0x00078000` | Minimum of front and back buffers                                      | `min(back[n], front[n])`                                 |
+| `0x00088000` | Constant                                                               | `b`                                                      |
+| `0x00098000` | Left shift constant b by back buffer value                             | `(b << back[n])`                                         |
+| `0x000a8000` | Vector Shift Right                                                     | `back[n] ROR.64 front[n]`                                |
+| `0x000b8000` | Same as previous one?                                                  | `back[n] >> front[n]`                                    |
+| `0x000c8000` | NAND                                                                   | `~(front[n] & back[n])`                                  |
+| `0x000d8000` | NOR                                                                    | `~(front[n] | back[n])`                                  |
+| `0x000e8000` | Inverted absolute difference                                           | `~(\|front[n]-back[n]\|)`                                |
+| `0x000f8000` | XOR parity                                                             | `back[n]0 ^ back[n]1 ^ back[n]2 ^ ...`                   |
+
+
 **WIP**  
 
 #### 0x00050000 to 0x0005f000
@@ -417,28 +439,6 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00e90000` | SAD (OR'ed with 0x00a00000)                                            |                                                          |
 | `0x00f90000` | *unknown*                                                              | `unknown`                                                |
 
-#### 0x00008000 to 0x000f8000
-
-| Opcode       | Operation                                                              | Expression                                               |
-|:-------------|:-----------------------------------------------------------------------|:---------------------------------------------------------|
-| `0x00008000` | Passthrough                                                            | `back[n]`                                                |
-| `0x00018000` | Subtract back buffer from front buffer and right shift                 | `(front[n] - back[n]) >> k`                              |
-| `0x00028000` | Same as previous one?                                                  |                                                          |
-| `0x00038000` | Accumulate front and back buffers                                      | `(front[n] + back[n])`                                   |
-| `0x00048000` | Subtract back buffer from front buffer and add constant b              | `(front[n] - back[n]) + b`                               |
-| `0x00058000` | Add second 8-bit channel components <br>and scale result               | `(((0xFF00 & front[n]) + (0xFF00 & back[n])) >> 8) << k` |
-| `0x00068000` | predicated select PHIMUX                                               | `(front[n] & a) != 0 ? b : back[n]`                      |
-| `0x00078000` | Minimum of front and back buffers                                      | `min(back[n], front[n])`                                 |
-| `0x00088000` | Constant                                                               | `b`                                                      |
-| `0x00098000` | Left shift constant b by back buffer value                             | `(b << back[n])`                                         |
-| `0x000a8000` | Vector Shift Right                                                     | `back[n] ROR.64 front[n]`                                |
-| `0x000b8000` | Same as previous one?                                                  | `back[n] >> front[n]`                                    |
-| `0x000c8000` | NAND                                                                   | `~(front[n] & back[n])`                                  |
-| `0x000d8000` | NOR                                                                    | `~(front[n] | back[n])`                                  |
-| `0x000e8000` | Inverted absolute difference                                           | `~(\|front[n]-back[n]\|)`                                |
-| `0x000f8000` | XOR parity                                                             | `back[n]0 ^ back[n]1 ^ back[n]2 ^ ...`                   |
-
-
 #### 0x00010000 to 0x00f10000
 
 | Opcode       | Operation                                                     | Expression                                                       |
@@ -459,6 +459,46 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00d10000` |                                                               |                                                                  |
 | `0x00e10000` |                                                               |                                                                  |
 | `0x00f10000` |                                                               |                                                                  |
+
+#### Todo
+
+| Opcode       | Operation                                                     | Expression                                                       |
+|:-------------|:--------------------------------------------------------------|:-----------------------------------------------------------------|
+| `0x00400000` |                                                               |                                                                  |
+| `0x00410000` |                                                               |                                                                  |
+| `0x00420000` |                                                               |                                                                  |
+| `0x00430000` |                                                               |                                                                  |
+| `0x00440000` |                                                               |                                                                  |
+| `0x00450000` |                                                               |                                                                  |
+| `0x00460000` |                                                               |                                                                  |
+| `0x00470000` |                                                               |                                                                  |
+| `0x00480000` |                                                               |                                                                  |
+| `0x00490000` |                                                               |                                                                  |
+| `0x004a0000` |                                                               |                                                                  |
+| `0x004b0000` |                                                               |                                                                  |
+| `0x004c0000` |                                                               |                                                                  |
+| `0x004d0000` |                                                               |                                                                  |
+| `0x004e0000` |                                                               |                                                                  |
+| `0x004f0000` |                                                               |                                                                  |
+
+| Opcode       | Operation                                                     | Expression                                                       |
+|:-------------|:--------------------------------------------------------------|:-----------------------------------------------------------------|
+| `0x00020000` |                                                               |                                                                  |
+| `0x00120000` |                                                               |                                                                  |
+| `0x00220000` |                                                               |                                                                  |
+| `0x00320000` |                                                               |                                                                  |
+| `0x00420000` |                                                               |                                                                  |
+| `0x00520000` |                                                               |                                                                  |
+| `0x00620000` |                                                               |                                                                  |
+| `0x00720000` |                                                               |                                                                  |
+| `0x00820000` |                                                               |                                                                  |
+| `0x00920000` |                                                               |                                                                  |
+| `0x00a20000` |                                                               |                                                                  |
+| `0x00b20000` |                                                               |                                                                  |
+| `0x00c20000` |                                                               |                                                                  |
+| `0x00d20000` |                                                               |                                                                  |
+| `0x00e20000` |                                                               |                                                                  |
+| `0x00f20000` |                                                               |                                                                  |
 
 
 ### MODIFIER Observations
