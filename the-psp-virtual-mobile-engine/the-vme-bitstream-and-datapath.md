@@ -26,7 +26,7 @@ The following is an attempt to explain how the VME pipeline works.
 - As an individual unit, the PE directly maps routes to data sources. For example, 'top' buffers are mapped to the related 'TOP' blocks of the PEs, and 'base' buffers are mapped to the 'BASE' blocks of the PEs.
 - By default, PEs run asynchronously and independently from each other. A sequential flow must be explicitly enforced through synchronization.
 - As a unit within a sequential flow, a PE inherits the last processed data from the previous stage, referred to as the back buffer, while still retaining its own TOP and BASE buffer mapping.
-- A PE can explicitly process data by applying operations on its input, including arithmetic, bitwise logic, shifts and conditional operations. This behavior must be configured through the DESCRIPTOR node.
+- A PE can explicitly process data by applying operations on its input, including arithmetic, bitwise logic, shifts and conditional operations. This behavior must be configured through the FU DESCRIPTOR node.
 - Independently of any computation, a PE always has a structural role through its source and destination configuration, covering routing, offsets, word counts, local transformations and synchronization, among other capabilities that are not yet fully understood.
 
 
@@ -83,8 +83,8 @@ Note on FFT bit-reversal stage:
 #### Internal Accumulator
 The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.  
 
-#### Descriptors
-For now we have the following observed format for the TOP and BASE descriptors: `MUX(F Sel << 28 | B Sel << 24 | S Sel << 22) | Opcode << 12 | Sat << 8 | unknown << 6 | k`, where F Sel is the front buffer Selector, B Sel is the back buffer Selector, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (for example, after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself. In any case, more tests need to be done to clarify the bits.
+#### FUs Descriptors
+For now we have the following observed format for the PRIMARY and SECONDARY FU descriptors: `MUX(F Sel << 28 | B Sel << 24 | S Sel << 22) | Opcode << 12 | Sat << 8 | unknown << 6 | k`, where F Sel is the front buffer Selector, B Sel is the back buffer Selector, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (for example, after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself. In any case, more tests need to be done to clarify the bits.
 
 Bit field breakdown:
 
