@@ -423,18 +423,18 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 |:-------------|:-----------------------------------------------------------------------|:---------------------------------------------------------|
 | `0x00008000` | Passthrough                                                            | `back[n]`                                                |
 | `0x00018000` | Subtract back buffer from front buffer and right shift                 | `(front[n] - back[n]) >> k`                              |
-| `0x00028000` | Same as previous one                                                   |                                                          |
+| `0x00028000` | Same as previous one?                                                  |                                                          |
 | `0x00038000` | Accumulate front and back buffers                                      | `(front[n] + back[n])`                                   |
 | `0x00048000` | Subtract back buffer from front buffer and add constant b              | `(front[n] - back[n]) + b`                               |
 | `0x00058000` | Add second 8-bit channel components <br>and scale result               | `(((0xFF00 & front[n]) + (0xFF00 & back[n])) >> 8) << k` |
-| `0x00068000` | *unknown*                                                              |                                                          |
+| `0x00068000` | predicated select PHIMUX                                               | `(front[n] & a) != 0 ? b : back[n]`                      |
 | `0x00078000` | Minimum of front and back buffers                                      | `min(back[n], front[n])`                                 |
 | `0x00088000` | Constant                                                               | `b`                                                      |
 | `0x00098000` | Left shift constant b by back buffer value                             | `(b << back[n])`                                         |
 | `0x000a8000` | Vector Shift Right                                                     | `back[n] ROR.64 front[n]`                                |
 | `0x000b8000` | Same as previous one?                                                  | `back[n] >> front[n]`                                    |
-| `0x000c8000` | *unknown*                                                              |                                                          |
-| `0x000d8000` | *unknown*                                                              |                                                          |
+| `0x000c8000` | NAND                                                                   | `~(front[n] & back[n])`                                  |
+| `0x000d8000` | NOR                                                                    | `~(front[n] | back[n])`                                  |
 | `0x000e8000` | Inverted absolute difference                                           | `~(\|front[n]-back[n]\|)`                                |
 | `0x000f8000` | XOR parity                                                             | `back[n]0 ^ back[n]1 ^ back[n]2 ^ ...`                   |
 
