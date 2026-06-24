@@ -36,7 +36,7 @@ The composition of a Process Element is as follows:
 
 | Register                  | Description                                                                                                                                                                                                                            | Format                      |
 |:--------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------|
-| FUNCTIONAL_UNIT_PRIMARY   | Configuration of the Top Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:6]  Sat` <br> `bit[5:0]   k` |
+| FUNCTIONAL_UNIT_PRIMARY   | Configuration of the Top Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:7]  Sat` <br> `bit[5:0]   k` |
 | FU_PRIMARY_REGISTER_A     | The 'a' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top a`                     |
 | FU_PRIMARY_REGISTER_B     | The 'b' register used by the selected operation <br>applied to the 'top' source                                                                                                                                                        | `top b`                     |
 | TOP_MODE                  | Routing to the 'top' source targeted by the <br>current Process Element, including the offset (in words) <br>from where to start                                                                                                       | `(routing << 16 \| offset)` |
@@ -45,7 +45,7 @@ The composition of a Process Element is as follows:
 | TOP_INNER_1               | Local AGU transformations applied on the 'top' source: <br>Shift, Scale, Step, unknown, depends on the local config                                                                                                                    | `(config << 16 \| value)`   |
 | TOP_FORMAT_0              | Local AGU transformations applied on the 'top' source: <br>offset shift, reverse, unknown, depends on the local config                                                                                                                 | `(config << 16 \| value)`   |
 | TOP_FORMAT_1              | Local AGU process applied on the 'top' source: sync, <br>unknown, depends on the local config                                                                                                                                          | `(config << 16 \| value)`   |
-| FUNCTIONAL_UNIT_SECONDARY | Configuration of the Base Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:6]  Sat` <br> `bit[5:0]   k` |
+| FUNCTIONAL_UNIT_SECONDARY | Configuration of the Base Functional Unit (FU). <br>`Mux F Sel` and `Mux B Sel` select the front and back buffer <br>inputs of the internal two-input MUX feeding the ALU/MAC, <br>which applies `Opcode` on the multiplexed data. <br>The result passes through the saturator (`Sat`) <br>and the shifter (`k`). | `bit[31:28] Mux F Sel` <br> `bit[27:24] Mux B Sel` <br> `bit[23:12] Opcode` <br> `bit[11:7]  Sat` <br> `bit[5:0]   k` |
 | FU_SECONDARY_REGISTER_A   | The 'a' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base a`                    |
 | FU_SECONDARY_REGISTER_B   | The 'b' register used by the selected operation <br>applied to the 'base' source                                                                                                                                                       | `base b`                    |
 | BASE_MODE                 | Routing to the 'base' source targeted by the current <br>Process Element, including the offset (in words) <br>from where to start                                                                                                      | `(routing << 16 \| offset)` |
@@ -84,7 +84,7 @@ Note on FFT bit-reversal stage:
 The real size of the internal accumulator appears to be 64 bits with barrel/cyclic rotation capability, which can be verified by shifting the value 0x01.  
 
 #### FUs Descriptors
-For now we have the following observed format for the PRIMARY and SECONDARY FU descriptors: `MUX(F Sel << 28 | B Sel << 24 | S Sel << 22) | Opcode << 12 | Sat << 8 | unknown << 6 | k`, where F Sel is the front buffer Selector, B Sel is the back buffer Selector, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (for example, after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself. In any case, more tests need to be done to clarify the bits.
+For now we have the following observed format for the PRIMARY and SECONDARY FU descriptors: `MUX(F Sel << 28 | B Sel << 24 | S Sel << 22) | Opcode << 12 | Sat << 7 | unknown << 6 | k`, where F Sel is the front buffer Selector, B Sel is the back buffer Selector, and the last 6 bits are the shift amount. The shift can be used to bring data back from the upper 32 bits of the accumulator (for example, after N successive accumulations, the result could grow up to log2(N) bits upward, requiring a corresponding shift to normalize the output), however the shift may also be used as part of the computation itself. In any case, more tests need to be done to clarify the bits.
 
 Bit field breakdown:
 
@@ -96,21 +96,24 @@ Bit field breakdown:
 | `[23:20]` | Operation family      |                                                       |
 | `[19:16]` | Operation variant     |                                                       |
 | `[15:12]` | Mode?                 |                                                       |
-| `[11:6]`  | Saturation            | See the saturator note below                          |
+| `[11:7]`  | Saturation            | See the saturator note below                          |
+| `[6:6]`   | *unknown*             | *reverse Shift?* or *Sat related?*                    |
 | `[5:0]`   | `k`                   | Shift amount in most cases (6 bits, range 0–63)       |
 
 
-**Note on the FU Saturator Field `[11:6]`**
+**Note on the FU Saturator Field `[11:7]`**
 
 | Bit    | Min         | Max        |
 |:-------|:------------|:-----------|
-| `[6]`  |             |            |
 | `[7]`  | -1          | 0          |
 | `[8]`  | -2          | 1          |
 | `[9]`  | -8          | 7          |
 | `[10]` | -128        | 127        |
 | `[11]` | -32768      | 32767      |
 
+or with n << 7:  
+Min -2^(n-1)  
+Max 2^(n-1) - 1  
 
 #### Back and Front Buffers
 In the following, what is referred to as the Back buffer is the buffer routed to the current TOP_SOURCE, over which the Front buffer will be processed. It is worth noting that the Front buffer appears to be routable to any Base or Top buffer available in the ranges `0x44000000` or `0x44020000` using the F Sel related bits.
@@ -282,7 +285,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x0004c000` | Negate back shifted by b, add a                                   | `(-(back[n] >> b)) + a`                     |
 | `0x0005c000` | Add front and back, shift left by k (1-2 bits)                    | `(back[n] + front[n]) << k` with `k[0..1]`  |
 | `0x0006c000` | Branchless conditional move (CMOV) with bias                      | `((front[n] & a) ? back[n] : 0) + b`        |
-| `0x0007c000` | Clamp back buffer                                                 | `max(a, min(b, back[n]))`                   |
+| `0x0007c000` | Clamp back buffer                                                 | `max(b, min(a, back[n]))`                   |
 | `0x0008c000` | Conditional: return b if bit test on back passes, else 0          | `(back[n] & a) ? b : 0`                     |
 | `0x0009c000` | Right shift constant b by back[n] (variable barrel shift)         | `(b >> back[n])`                            |
 | `0x000ac000` | Right shift back[n] by constant b                                 | `(back[n]) >> b`                            |
