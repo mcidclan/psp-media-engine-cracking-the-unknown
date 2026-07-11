@@ -2,6 +2,7 @@
 
 This is a temporary documentation on the VME, aiming to record observations as well as the behavior of the VME during the hardware testing phase of the CGRA, with tests being conducted on a PSP Slim. This documentation will serve as a basis for a future, more comprehensive documentation.
 
+> **Important Note:** The discovery of new functionalities or improvements in the understanding of the hardware evolves in parallel with the experimentation carried out on the machine. Depending on the research and use cases, the library may evolve more rapidly. For more information, please consult the [`psp-media-engine-custom-core`](https://github.com/mcidclan/psp-media-engine-custom-core/blob/main/vme-lib.h) project.
 
 ### Bitstream/Context Memory and DataPath
 
