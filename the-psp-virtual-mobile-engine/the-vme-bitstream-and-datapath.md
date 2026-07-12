@@ -115,6 +115,7 @@ Bit field breakdown:
 or with n << 7:  
 Min -2^(n-1)  
 Max 2^(n-1) - 1  
+*Note: max sat 0x40000000 (31 << 7)*  
 
 #### Back and Front Buffers
 In the following, what is referred to as the Back buffer is the buffer routed to the current TOP_SOURCE, over which the Front buffer will be processed. It is worth noting that the Front buffer appears to be routable to any Base or Top buffer available in the ranges `0x44000000` or `0x44020000` using the F Sel related bits.
@@ -217,7 +218,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00220000` | Vector Multiply-Shift                            | `(back[n] * front[n]) >> k`                                           |
 | `0x00230000` | Negated Vector Multiply-Shift                    | `-((front[n] * back[n]) >> k)`                                        |
 | `0x00240000` | Inner Product running VMAC with Bias             | `(Σn(back[n] * front[n]) + b) >> k`                                   |
-| `0x00250000` | Accumulate with Shift and Bias                   | `(i == 0 ? (b >> K) : out[n-1]) + (back[n] >> k)`                     |
+| `0x00250000` | Accumulate with Shift and Bias                   | `i == 0 ? (b >> k) : ((out[n-1] + back[n] + b) >> k)`                |
 | `0x00260000` | Scalar Multiply-Shift with Bias                  | `((a * n) + b) >> k`                                                  |
 | `0x00270000` | Vector Multiply-Shift with Bias                  | `(back[n] * front[n]) + b) >> k`                                      |
 | `0x00280000` | Delayed Feedback IIR Accumulator                 | `0 if n < 2 else ((out[n-1] + front[n-2] + back[n-2]) >> k) + a`      |
@@ -337,7 +338,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00088000` | Constant                                                               | `b`                                                      |
 | `0x00098000` | Left shift constant b by back buffer value                             | `(b << back[n])`                                         |
 | `0x000a8000` | Vector Shift Right                                                     | `back[n] ROR.64 front[n]`                                |
-| `0x000b8000` | Same as previous one?                                                  | `back[n] >> front[n]`                                    |
+| `0x000b8000` | Right shift back by front                                              | `back[n] >> front[n]`                                    |
 | `0x000c8000` | NAND                                                                   | `~(front[n] & back[n])`                                  |
 | `0x000d8000` | NOR                                                                    | `~(front[n] | back[n])`                                  |
 | `0x000e8000` | Inverted absolute difference                                           | `~(\|front[n]-back[n]\|)`                                |
@@ -390,38 +391,47 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 
 #### 0x00050000 to 0x00f50000
 
-| Opcode       | Operation                                                              | Expression                                           |
-|:-------------|:-----------------------------------------------------------------------|:-----------------------------------------------------|
-| `0x00050000` | Subtract front buffer right shifted by b from back buffer              | `back[n] - (front[n] >> b)`                          |
-| `0x00150000` | Back buffer                                                            | `back[n]`                                            |
-| `0x00250000` | Accumulate with Shift and Bias                                         | `(i == 0 ? (b >> k) : out[n-1]) + (back[n] >> k)`    |
-| `0x00350000` | *unknown*                                                              | *unknown*                                            |
-| `0x00450000` | Subtract and right shift                                               | `(back[n] - front[n]) >> b`                          |
-| `0x00550000` | Back buffer                                                            | `back[n]`                                            |
-| `0x00650000` |                                                                        | `(out[n-1] + back[n] + b) >> k`                      |
-| `0x00750000` | *unknown*                                                              |                                                      |
-| `0x00850000` |                                                                        | `-front[n]`                                          |
-| `0x00950000` | *unknown*                                                              |                                                      |
-| `0x00a50000` |                                                                        |                                                      |
-| `0x00b50000` |                                                                        |                                                      |
-| `0x00c50000` |                                                                        |                                                      |
-| `0x00d50000` |                                                                        |                                                      |
-| `0x00e50000` |                                                                        |                                                      |
-| `0x00f50000` |                                                                        |                                                      |
+| Opcode       | Operation                                                           | Expression                                              |
+|:-------------|:--------------------------------------------------------------------|:--------------------------------------------------------|
+| `0x00050000` | Subtract front buffer right shifted by b from back buffer           | `back[n] - (front[n] >> b)`                             |
+| `0x00150000` | Back buffer                                                         | `back[n]`                                               |
+| `0x00250000` | Accumulate with Shift and Bias                                      | `i == 0 ? (b >> k) : ((out[n-1] + back[n] + b) >> k)`   |
+| `0x00350000` | *unknown*                                                           | *unknown*                                               |
+| `0x00450000` | Subtract and right shift                                            | `(back[n] - front[n]) >> b`                             |
+| `0x00550000` | Back buffer                                                         | `back[n]`                                               |
+| `0x00650000` | Same as 0x00250000?                                                 | `(out[n-1] + back[n] + b) >> k`                         |
+| `0x00750000` | *unknown*                                                           | *unknown*                                               |
+| `0x00850000` | Negate Front                                                        | `-front[n]`                                             |
+| `0x00950000` | *unknown*                                                           | *unknown*                                               |
+| `0x00a50000` | *unknown*                                                           | *unknown*                                               |
+| `0x00b50000` | *unknown*                                                           | *unknown*                                               |
+| `0x00c50000` | Same as 0x00850000?                                                 | `-front[n]`                                             |
+| `0x00d50000` | *unknown*                                                           | *unknown*                                               |
+| `0x00e50000` | *unknown*                                                           | *unknown*                                               |
+| `0x00f50000` | *unknown*                                                           | *unknown*                                               |
 
 
 #### 0x00001000 to 0x000f1000
  
-| Opcode       | FU Name                  | Operation                     | Expression                                           |
-|:-------------|:-------------------------|:------------------------------|:-----------------------------------------------------|
-| `0x00001000` |                          |                               |                                                      |
-| `0x00011000` | Vector Add               | Element-wise addition         | `back[n] + front[n]`                                 |
-| `0x00021000` | Accumulate Add           | Accumulated addition          | `back[n] + front[n]`                                 |
-| `0x00031000` | Add Immediate            | Addition with immediate       | `(back[n] + front[n]) + a`                           |
-| `0x00041000` | Shift Scale              | Arithmetic right scaling      | `(back[n] + front[n]) >> b`                          |
-| `0x00051000` | Subtract Bias            | Difference with bias removal  | `(back[n] - front[n]) - b`                           |
-| `0x00061000` | Predicate Negate         | Conditional sign inversion    | `(front[n] & a) ? -back[n] : back[n]`                |
-| `0x00071000` | Predicated Add/Sub       | Conditional add/subtract      | `(i & a) ? back[i] - b : back[i] + b`                |
+| Opcode       |  Operation                                                     | Expression                                           |
+|:-------------|:---------------------------------------------------------------|:-----------------------------------------------------|
+| `0x00001000` |                                                                |                                                      |
+| `0x00011000` | Vector Add, element-wise addition                              | `back[n] + front[n]`                                 |
+| `0x00021000` | Accumulate Add, accumulated addition                           | `back[n] + front[n]`                                 |
+| `0x00031000` | Add Immediate, addition with immediate                         | `(back[n] + front[n]) + a`                           |
+| `0x00041000` | Shift Scale, arithmetic right scaling                          | `(back[n] + front[n]) >> b`                          |
+| `0x00051000` | Subtract Bias, difference with bias removal                    | `(back[n] - front[n]) - b`                           |
+| `0x00061000` | Predicate Negate, conditional sign inversion                   | `(front[n] & a) ? -back[n] : back[n]`                |
+| `0x00071000` | Predicated Add/Sub, conditional add/subtract                   | `(i & a) ? back[i] - b : back[i] + b`                |
+| `0x00081000` | Multiply back and front buffers if front[n] ∈ [-2, 2], else 0  | `(back[n] * front[n]) * 1[-2,2]​(front[n])`           |
+| `0x00091000` | Left shift constant b by Back buffer value                     | `b << back[n]`                                       |
+| `0x000a1000` | Right shift back by front                                      | `front[n] << back[n]`                                |
+| `0x000b1000` | Same as previous one?                                          |                                                      |
+| `0x000c1000` | front AND back                                                 | `front[n] & back[n]`                                 |
+| `0x000d1000` | front OR back                                                  | `front[n] | back[n]`                                 |
+| `0x000e1000` | front XOR back                                                 | `front[n] ^ back[n]`                                 |
+| `0x000f1000` | *unknown*                                                      | *unknown*                                            |
+
 
 #### 0x00090000 to 0x00f90000
 
