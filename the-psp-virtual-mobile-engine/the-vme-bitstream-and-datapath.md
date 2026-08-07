@@ -340,7 +340,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x000a8000` | Vector Shift Right                                                     | `back[n] ROR.64 front[n]`                                |
 | `0x000b8000` | Right shift back by front                                              | `back[n] >> front[n]`                                    |
 | `0x000c8000` | NAND                                                                   | `~(front[n] & back[n])`                                  |
-| `0x000d8000` | NOR                                                                    | `~(front[n] | back[n])`                                  |
+| `0x000d8000` | NOR                                                                    | `~(front[n] \| back[n])`                                  |
 | `0x000e8000` | Inverted absolute difference                                           | `~(\|front[n]-back[n]\|)`                                |
 | `0x000f8000` | XOR parity                                                             | `back[n]0 ^ back[n]1 ^ back[n]2 ^ ...`                   |
 
@@ -428,7 +428,7 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x000a1000` | Right shift back by front                                      | `front[n] << back[n]`                                |
 | `0x000b1000` | Same as previous one?                                          |                                                      |
 | `0x000c1000` | front AND back                                                 | `front[n] & back[n]`                                 |
-| `0x000d1000` | front OR back                                                  | `front[n] | back[n]`                                 |
+| `0x000d1000` | front OR back                                                  | `front[n] \| back[n]`                                 |
 | `0x000e1000` | front XOR back                                                 | `front[n] ^ back[n]`                                 |
 | `0x000f1000` | *unknown*                                                      | *unknown*                                            |
 
