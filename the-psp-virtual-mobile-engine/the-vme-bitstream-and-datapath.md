@@ -98,7 +98,7 @@ Bit field breakdown:
 | `[19:16]` | Operation variant     |                                                       |
 | `[15:12]` | Mode?                 |                                                       |
 | `[11:7]`  | Saturation            | See the saturator note below                          |
-| `[6:6]`   | *unknown*             | *reverse Shift?* or *Sat related?*                    |
+| `[6:6]`   | Round mode            |                                                       |
 | `[5:0]`   | `k`                   | Shift amount in most cases (6 bits, range 0–63)       |
 
 
