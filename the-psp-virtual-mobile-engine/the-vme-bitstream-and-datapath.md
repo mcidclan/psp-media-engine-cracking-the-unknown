@@ -156,7 +156,7 @@ Each nibble encodes the index of the PE whose BASE_SRC (or TOP_SRC) is routed as
 
 **INTERCONNECT_SKEW** selects an input and applies a cycle skew to the data stream forwarded to the target PE.
 ```text
-  top[31:16]{[PE3:4] [PE2:4] [PE1:4] [PE0:4]} base[15:0]{[PE3:4] [PE2:4] [PE1:4] [PE0:4]}
+  top[31:16]{[unk:4] [PE3:3] [PE2:3] [PE1:3] [PE0:3]} base[15:0]{[unk:4] [PE3:3] [PE2:3] [PE1:3] [PE0:3]}
 ```
 Each nibble encodes:
 ```text
