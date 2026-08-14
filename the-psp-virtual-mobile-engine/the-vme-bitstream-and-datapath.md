@@ -235,24 +235,24 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 
 | Opcode       | Operation                                                     | Expression                                                       | Duplicate |
 |:-------------|:--------------------------------------------------------------|:-----------------------------------------------------------------|:----------|
-| `0x00a00000` | *unclear*                                                     | `(back[n] * front[n]) >> k`                                      | yes       |
-| `0x00a10000` | *unclear*                                                     | `front[n] * front[n-1] + ((!(n % 4) && n) ? front[n-1] / 3 : 0)` | no        |
-| `0x00a20000` | same as 0x00a00000?                                           |                                                                  | yes       |
-| `0x00a30000` | *unclear*                                                     | `-((back[n] * front[n]) >> k)`                                   | yes       |
-| `0x00a40000` | *unclear*                                                     | `(Σn(back[n] * front[n]) + b) >> k`                              | yes       |
-| `0x00a50000` | *unclear*                                                     | `(Σn(front[0..n]) + b) >> k`                                     | no        |
-| `0x00a60000` | *unclear*                                                     | `((n * a) + b) >> k`                                             | yes       |
-| `0x00a70000` | *unclear*                                                     | `(back[n] * front[n]) + b) >> k`                                 | yes       |
-| `0x00a80000` | *unclear*                                                     | `0 if n < 2 else ((out[n-1] + front[n-2] + back[n-2]) >> k) + a` | yes       |
-| `0x00a90000` | *unclear*                                                     | `Σ{m=0..n-2} abs(back[m] - front[m]) + b`                        | yes       |
-| `0x00aa0000` |  Same as `0x00a80000`?                                        |                                                                  | yes       |
-| `0x00ab0000` | *unknown*                                                     |                                                                  |           |
-| `0x00ac0000` | *unknown*                                                     |                                                                  |           |
-| `0x00ad0000` | *unknown*                                                     |                                                                  |           |
-| `0x00ae0000` | *unknown*                                                     |                                                                  |           |
-| `0x00af0000` | *unknown*                                                     |                                                                  |           |
+| ~~`0x00a00000`~~ | *unclear*                                                     | `(back[n] * front[n]) >> k`                                      | yes       |
+| ~~`0x00a10000`~~ | *unclear*                                                     | `front[n] * front[n-1] + ((!(n % 4) && n) ? front[n-1] / 3 : 0)` | no        |
+| ~~`0x00a20000`~~ | same as 0x00a00000?                                           |                                                                  | yes       |
+| ~~`0x00a30000`~~ | *unclear*                                                     | `-((back[n] * front[n]) >> k)`                                   | yes       |
+| ~~`0x00a40000`~~ | *unclear*                                                     | `(Σn(back[n] * front[n]) + b) >> k`                              | yes       |
+| ~~`0x00a50000`~~ | *unclear*                                                     | `(Σn(front[0..n]) + b) >> k`                                     | no        |
+| ~~`0x00a60000`~~ | *unclear*                                                     | `((n * a) + b) >> k`                                             | yes       |
+| ~~`0x00a70000`~~ | *unclear*                                                     | `(back[n] * front[n]) + b) >> k`                                 | yes       |
+| ~~`0x00a80000`~~ | *unclear*                                                     | `0 if n < 2 else ((out[n-1] + front[n-2] + back[n-2]) >> k) + a` | yes       |
+| ~~`0x00a90000`~~ | *unclear*                                                     | `Σ{m=0..n-2} abs(back[m] - front[m]) + b`                        | yes       |
+| ~~`0x00aa0000`~~ |  Same as `0x00a80000`?                                        |                                                                  | yes       |
+| ~~`0x00ab0000`~~ | *unknown*                                                     |                                                                  |           |
+| ~~`0x00ac0000`~~ | *unknown*                                                     |                                                                  |           |
+| ~~`0x00ad0000`~~ | *unknown*                                                     |                                                                  |           |
+| ~~`0x00ae0000`~~ | *unknown*                                                     |                                                                  |           |
+| ~~`0x00af0000`~~ | *unknown*                                                     |                                                                  |           |
 
-*Note: using this opcode, or when OR'ing `0x00800000` with another opcode, the Back and Front buffers appear to be respectively routed to `0x44020000` and `0x44020800`.*
+~~*Note: using this opcode, or when OR'ing `0x00800000` with another opcode, the Back and Front buffers appear to be respectively routed to `0x44020000` and `0x44020800`.*~~
 
 
 #### Inter-buffer
@@ -302,9 +302,9 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 
 | Opcode       | Operation                                                              | Expression                                             |
 |:-------------|:-----------------------------------------------------------------------|:-------------------------------------------------------|
-| `0x00100000` | Running max                                                            | `max(out[n-1], in[n])`                                 |
+| `0x00100000` | Running max                                                            | `max(out[n-1], in[n])`                                 |
 | `0x00110000` | Running min extrema filters                                            | `min(LASTMIN(out), back[n] - front[n])`                |
-| `0x00120000` | Running rate-limited smoothing filter <br>Peak Clamper ?               | `min(in[n], max(in[0..n−1])); out[0] = in[0]`          |
+| `0x00120000` | Running rate-limited smoothing filter <br>Peak Clamper ?               | `min(in[n], max(in[0..n−1])); out[0] = in[0]`          |
 | `0x00130000` | Running max extrema filters                                            | `max(LASTMIN(out), back[n] - front[n])`                |
 
 | Opcode       | Operation                                                              | Expression                                           |
@@ -397,18 +397,18 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00150000` | Back buffer                                                         | `back[n]`                                               |
 | `0x00250000` | Accumulate with Shift and Bias                                      | `i == 0 ? (b >> k) : ((out[n-1] + back[n] + b) >> k)`   |
 | `0x00350000` | *unknown*                                                           | *unknown*                                               |
-| `0x00450000` | Subtract and right shift                                            | `(back[n] - front[n]) >> b`                             |
-| `0x00550000` | Back buffer                                                         | `back[n]`                                               |
-| `0x00650000` | Same as 0x00250000?                                                 | `(out[n-1] + back[n] + b) >> k`                         |
-| `0x00750000` | *unknown*                                                           | *unknown*                                               |
-| `0x00850000` | Negate Front                                                        | `-front[n]`                                             |
-| `0x00950000` | *unknown*                                                           | *unknown*                                               |
-| `0x00a50000` | *unknown*                                                           | *unknown*                                               |
-| `0x00b50000` | *unknown*                                                           | *unknown*                                               |
-| `0x00c50000` | Same as 0x00850000?                                                 | `-front[n]`                                             |
-| `0x00d50000` | *unknown*                                                           | *unknown*                                               |
-| `0x00e50000` | *unknown*                                                           | *unknown*                                               |
-| `0x00f50000` | *unknown*                                                           | *unknown*                                               |
+| ~~`0x00450000`~~ | Subtract and right shift                                            | `(back[n] - front[n]) >> b`                             |
+| ~~`0x00550000`~~ | Back buffer                                                         | `back[n]`                                               |
+| ~~`0x00650000`~~ | Same as 0x00250000?                                                 | `(out[n-1] + back[n] + b) >> k`                         |
+| ~~`0x00750000`~~ | *unknown*                                                           | *unknown*                                               |
+| ~~`0x00850000`~~ | Negate Front                                                        | `-front[n]`                                             |
+| ~~`0x00950000`~~ | *unknown*                                                           | *unknown*                                               |
+| ~~`0x00a50000`~~ | *unknown*                                                           | *unknown*                                               |
+| ~~`0x00b50000`~~ | *unknown*                                                           | *unknown*                                               |
+| ~~`0x00c50000`~~ | Same as 0x00850000?                                                 | `-front[n]`                                             |
+| ~~`0x00d50000`~~ | *unknown*                                                           | *unknown*                                               |
+| ~~`0x00e50000`~~ | *unknown*                                                           | *unknown*                                               |
+| ~~`0x00f50000`~~ | *unknown*                                                           | *unknown*                                               |
 
 
 #### 0x00001000 to 0x000f1000
@@ -462,18 +462,18 @@ Using the following opcodes, the Back and Front buffers both appear to be routed
 | `0x00110000` | Running min extrema filters                                   | `min(LASTMIN(out), back[n] - front[n])`                          |
 | `0x00210000` | Delayed Scalar Multiply-Shift                                 | `(x[n] * x[n-1]) >> k` with `x[-1] = b`                          |
 | `0x00310000` |                                                               | `(back[n] + front[n]) >> k`                                      |
-| `0x00410000` |                                                               | `(back[n] + front[n]) >> k`                                      |
-| `0x00510000` |                                                               | `(front[n] - back[n]) >> k`                                      |
-| `0x00610000` |                                                               | `back[i] * back[i-1]` with `back[-1] = b`                        |
-| `0x00710000` |                                                               |                                                                  |
-| `0x00810000` |                                                               |                                                                  |
-| `0x00910000` |                                                               |                                                                  |
-| `0x00a10000` | *unclear*                                                     | `front[n] * front[n-1] + ((!(n % 4) && n) ? front[n-1] / 3 : 0)` |
-| `0x00b10000` |                                                               |                                                                  |
-| `0x00c10000` |                                                               |                                                                  |
-| `0x00d10000` |                                                               |                                                                  |
-| `0x00e10000` |                                                               |                                                                  |
-| `0x00f10000` |                                                               |                                                                  |
+| ~~`0x00410000`~~ |                                                               | `(back[n] + front[n]) >> k`                                      |
+| ~~`0x00510000`~~ |                                                               | `(front[n] - back[n]) >> k`                                      |
+| ~~`0x00610000`~~ |                                                               | `back[i] * back[i-1]` with `back[-1] = b`                        |
+| ~~`0x00710000`~~ |                                                               |                                                                  |
+| ~~`0x00810000`~~ |                                                               |                                                                  |
+| ~~`0x00910000`~~ |                                                               |                                                                  |
+| ~~`0x00a10000`~~ | *unclear*                                                     | `front[n] * front[n-1] + ((!(n % 4) && n) ? front[n-1] / 3 : 0)` |
+| ~~`0x00b10000`~~ |                                                               |                                                                  |
+| ~~`0x00c10000`~~ |                                                               |                                                                  |
+| ~~`0x00d10000`~~ |                                                               |                                                                  |
+| ~~`0x00e10000`~~ |                                                               |                                                                  |
+| ~~`0x00f10000`~~ |                                                               |                                                                  |
 
 #### Todo
 
