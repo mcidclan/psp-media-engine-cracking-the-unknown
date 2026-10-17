@@ -122,13 +122,13 @@ In the following, what is referred to as the Back buffer is the buffer routed to
 
 #### Globals
 
-**INTERCONNECT_AGU_TOP** (renamed from INPUT) maps the 8 buffers to PE inputs in the following layout:
+**INTERCONNECT_AGU_TOP** (renamed from INPUT) maps the 4 buffers to PE inputs in the following layout:
 ```text
-  [PE3:8] [PE2:8] [PE1:8] [PE0:8]
+  [PE3:4] [PE2:4] [PE1:4] [PE0:4]
 ```
-Each byte encodes:
+Each nibble encodes:
 ```text
-  [front index routing:4 | back index routing:4]
+  [PE index routing:4]
 ```
 
 *Note:can be using with `BASE_INPUT`/`ENABLE_SECOND_FU` as a router*
